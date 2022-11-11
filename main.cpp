@@ -14,6 +14,7 @@
 #include "tiny_obj_loader.h"
 
 /* Global Variables */
+float window_height = 480.0f, window_width = 640.0f;
 float x_mod = 0;
 
 void Key_Callback(GLFWwindow* window,
@@ -39,7 +40,7 @@ int main(void)
         return -1;
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    window = glfwCreateWindow(window_width, window_height, "Hello World", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -54,9 +55,6 @@ int main(void)
     /* Screen Space */
     // Should be same size as window
     glViewport(0, 0, 640, 480);
-
-
-
 
     /* Set Callback function */
     glfwSetKeyCallback(window, Key_Callback);
@@ -187,12 +185,12 @@ int main(void)
             glm::radians(theta),
             glm::normalize(glm::vec3(rot_x, rot_y, rot_z)));
 
-    glm::mat4 projection = glm::ortho(-2.0f,
-        2.0f,
-        -2.0f,
-        2.0f,
-        -1.f,
-        1.0f);
+    glm::mat4 projection = glm::perspective(
+        glm::radians(60.0f),
+        window_height / window_width,
+        0.1f,
+        100.0f
+    );
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -206,7 +204,7 @@ int main(void)
 
         // translation
         transformation_matrix = glm::translate(transformation_matrix,
-            glm::vec3(x, y, z));
+            glm::vec3(x, y, z -5.0f));
 
         // scale
         transformation_matrix = glm::scale(transformation_matrix,
