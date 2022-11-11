@@ -63,7 +63,7 @@ int main(void)
     stbi_set_flip_vertically_on_load(true);
 
     unsigned char* tex_bytes =
-        stbi_load("3D/ayaya.png",
+        stbi_load("3D/partenza.jpg",
             &img_width,
             &img_height,
             &colorChannels,
@@ -77,11 +77,11 @@ int main(void)
 
     glTexImage2D(GL_TEXTURE_2D,
         0,
-        GL_RGBA,
+        GL_RGB,
         img_width,
         img_height,
         0,
-        GL_RGBA,
+        GL_RGB,
         GL_UNSIGNED_BYTE,
         tex_bytes);
 
@@ -131,7 +131,7 @@ int main(void)
     glLinkProgram(shaderProg);
 
     /* Initialize Mesh Stuff*/
-    std::string path = "3D/myCube.obj";
+    std::string path = "3D/djSword.obj";
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> material;
     std::string warning, error;
@@ -170,6 +170,7 @@ int main(void)
 
         int vertexIndex = vData.vertex_index * 3;
         int uvIndex = vData.texcoord_index * 2;
+        int normsIndex = vData.normal_index * 3;
 
         // X
         fullVertexData.push_back(
@@ -186,6 +187,19 @@ int main(void)
             attributes.vertices[vertexIndex + 2]
         );
 
+        // normals
+        fullVertexData.push_back(
+            attributes.normals[normsIndex]
+        );
+
+        fullVertexData.push_back(
+            attributes.normals[normsIndex + 1]
+        );
+
+        fullVertexData.push_back(
+            attributes.normals[normsIndex + 2]
+        );
+
         // U
         fullVertexData.push_back(
             attributes.texcoords[uvIndex]
@@ -196,9 +210,7 @@ int main(void)
             attributes.texcoords[uvIndex + 1]
         );
 
-
     }
-
 
     GLfloat vertices[]{
         -0.5f, -0.5f, 0,
@@ -210,10 +222,9 @@ int main(void)
         0, 1, 2
     };
 
-    GLuint VAO, VBO, VBO_UV;
+    GLuint VAO, VBO;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
-    glGenBuffers(1, &VBO_UV);
 
     glBindVertexArray(VAO);
 
@@ -227,17 +238,17 @@ int main(void)
         3,
         GL_FLOAT,
         GL_FALSE,
-        5 * sizeof(GL_FLOAT),
+        8 * sizeof(GL_FLOAT),
         (void*)0);
 
-    GLintptr uvPtr = 3 * sizeof(float);
+    GLintptr uvPtr = 6 * sizeof(float);
 
     glVertexAttribPointer(
         2,
         2,
         GL_FLOAT,
         GL_FALSE,
-        5 * sizeof(float),
+        8 * sizeof(float),
         (void*)uvPtr
     );
 
@@ -262,7 +273,7 @@ int main(void)
             glm::vec3(x, y, z));
 
     float scale_x, scale_y, scale_z;
-    scale_x = scale_y = scale_z = 2.0f;
+    scale_x = scale_y = scale_z = 0.1f;
 
     glm::mat4 scale =
         glm::scale(identity_matrix4,
@@ -377,7 +388,7 @@ int main(void)
         //glBindVertexArray(VAO);
 
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, fullVertexData.size() / 5);
+        glDrawArrays(GL_TRIANGLES, 0, fullVertexData.size() / 8);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
