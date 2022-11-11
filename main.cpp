@@ -200,6 +200,45 @@ int main(void)
 
         theta = x_mod;
 
+        /* Camera */
+        // camera position
+        glm::vec3 cameraPos = glm::vec3(0, 0, 10.f);
+
+        glm::mat4 cameraPositionMatrix =
+            glm::translate(glm::mat4(1.0f),
+                cameraPos * -1.0f);
+
+        // world's up / center
+        glm::vec3 WorldUp = glm::vec3(0, 1.0f, 0);
+        glm::vec3 Center = glm::vec3(0, 3.0f, 0);
+
+        // forward
+        glm::vec3 F = glm::vec3(Center - cameraPos);
+        F = glm::normalize(F);
+
+        // right
+        glm::vec3 R = glm::cross(F, WorldUp);
+
+        // up
+        glm::vec3 U = glm::cross(R, F);
+
+        // orientation matrix
+        glm::mat4 cameraOrientation = glm::mat4(1.0f);
+
+        cameraOrientation[0][0] = R.x;
+        cameraOrientation[1][0] = R.y;
+        cameraOrientation[2][0] = R.z;
+
+        cameraOrientation[0][1] = U.x;
+        cameraOrientation[1][1] = U.y;
+        cameraOrientation[2][1] = U.z;
+
+        cameraOrientation[0][2] = -F.x;
+        cameraOrientation[1][2] = -F.y;
+        cameraOrientation[2][2] = -F.z;
+
+        glm::mat4 viewMatrix = cameraOrientation * cameraPositionMatrix;
+
         glm::mat4 transformation_matrix = glm::mat4(1.0f);
 
         // translation
@@ -220,6 +259,12 @@ int main(void)
             1,
             GL_FALSE,
             glm::value_ptr(projection));
+
+        unsigned int viewLoc = glGetUniformLocation(shaderProg, "view");
+        glUniformMatrix4fv(viewLoc,
+            1,
+            GL_FALSE,
+            glm::value_ptr(viewMatrix));
 
         unsigned int transformLoc = glGetUniformLocation(shaderProg, "transform");
         glUniformMatrix4fv(transformLoc,
