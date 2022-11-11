@@ -4,6 +4,11 @@
 #include <string>
 #include <iostream>
 
+// GLM Headers
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+
 // tinyloader
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
@@ -21,7 +26,7 @@ void Key_Callback(GLFWwindow* window,
     if (key == GLFW_KEY_D &&
         action == GLFW_PRESS) {
         // move bunny to the right
-        x_mod += 0.1f;
+        x_mod += 10.0f;
     }
 }
 
@@ -145,14 +150,65 @@ int main(void)
     glBindVertexArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
+    /* Create Matrix */
+    glm::mat3 identity_matrix3 = glm::mat3(1.0f);
+    glm::mat4 identity_matrix4 = glm::mat4(1.0f);
+
+    float x, y, z;
+    x = y = z = 0.0f;
+    y = -0.5f;
+
+    glm::mat4 translation =
+        glm::translate(identity_matrix4,
+            glm::vec3(x, y, z));
+
+    float scale_x, scale_y, scale_z;
+    scale_x = scale_y = scale_z = 5.0f;
+
+    glm::mat4 scale =
+        glm::scale(identity_matrix4,
+            glm::vec3(scale_x, scale_y, scale_z));
+
+    float rot_x, rot_y, rot_z;
+    rot_x = rot_y = rot_z = 0;
+    rot_y = 1.0f;
+
+    float theta = 90.0f;
+
+    glm::mat4 rotation =
+        glm::rotate(identity_matrix4,
+            glm::radians(theta),
+            glm::normalize(glm::vec3(rot_x, rot_y, rot_z)));
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
 
-        unsigned int xLoc = glGetUniformLocation(shaderProg, "x");
-        glUniform1f(xLoc, x_mod);
+        theta = x_mod;
+
+        glm::mat4 transformation_matrix = glm::mat4(1.0f);
+
+        // translation
+        transformation_matrix = glm::translate(transformation_matrix,
+            glm::vec3(x, y, z));
+
+        // scale
+        transformation_matrix = glm::scale(transformation_matrix,
+            glm::vec3(scale_x, scale_y, scale_z));
+
+        // rotate
+        transformation_matrix = glm::rotate(transformation_matrix,
+            glm::radians(theta),
+            glm::normalize(glm::vec3(rot_x, rot_y, rot_z)));
+
+        unsigned int transformLoc = glGetUniformLocation(shaderProg, "transform");
+        glUniformMatrix4fv(transformLoc,
+            1,
+            GL_FALSE,
+            glm::value_ptr(transformation_matrix));
+
 
         /* Apply Shaders */
         glUseProgram(shaderProg);
