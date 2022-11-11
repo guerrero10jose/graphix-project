@@ -162,6 +162,43 @@ int main(void)
         mesh_indices.push_back(shapes[0].mesh.indices[i].vertex_index);
     }
 
+    std::vector<GLfloat> fullVertexData;
+
+    for (int i = 0; i < shapes[0].mesh.indices.size(); i++) {
+
+        tinyobj::index_t vData = shapes[0].mesh.indices[i];
+
+        int vertexIndex = vData.vertex_index * 3;
+        int uvIndex = vData.texcoord_index * 2;
+
+        // X
+        fullVertexData.push_back(
+            attributes.vertices[vertexIndex]
+        );
+
+        // Y
+        fullVertexData.push_back(
+            attributes.vertices[vertexIndex + 1]
+        );
+
+        // Z
+        fullVertexData.push_back(
+            attributes.vertices[vertexIndex + 2]
+        );
+
+        // U
+        fullVertexData.push_back(
+            attributes.texcoords[uvIndex]
+        );
+
+        // V
+        fullVertexData.push_back(
+            attributes.texcoords[uvIndex + 1]
+        );
+
+
+    }
+
 
     GLfloat vertices[]{
         -0.5f, -0.5f, 0,
@@ -173,47 +210,35 @@ int main(void)
         0, 1, 2
     };
 
-    GLuint VAO, VBO, EBO, VBO_UV;
+    GLuint VAO, VBO, VBO_UV;
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glGenBuffers(1, &VBO_UV);
-    glGenBuffers(1, &EBO);
 
     glBindVertexArray(VAO);
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER,
-        sizeof(GL_FLOAT) * attributes.vertices.size(),
-        &attributes.vertices[0],
+        sizeof(GL_FLOAT) * fullVertexData.size(),
+        fullVertexData.data(),
         GL_STATIC_DRAW);
 
     glVertexAttribPointer(0,
         3,
         GL_FLOAT,
         GL_FALSE,
-        3 * sizeof(GL_FLOAT),
+        5 * sizeof(GL_FLOAT),
         (void*)0);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER,
-        sizeof(GLuint) * mesh_indices.size(),
-        mesh_indices.data(),
-        GL_STATIC_DRAW);
-
-    // bind uv buffer
-    glBindBuffer(GL_ARRAY_BUFFER, VBO_UV);
-    glBufferData(GL_ARRAY_BUFFER,
-        sizeof(GLfloat) * (sizeof(UV) / sizeof(UV[0])),
-        &UV[0],
-        GL_STATIC_DRAW);
+    GLintptr uvPtr = 3 * sizeof(float);
 
     glVertexAttribPointer(
         2,
         2,
         GL_FLOAT,
         GL_FALSE,
-        2 * sizeof(float),
-        (void*)0
+        5 * sizeof(float),
+        (void*)uvPtr
     );
 
 
@@ -349,13 +374,10 @@ int main(void)
         /* Apply Shaders */
         glUseProgram(shaderProg);
 
-        glBindVertexArray(VAO);
+        //glBindVertexArray(VAO);
 
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES,
-            mesh_indices.size(),
-            GL_UNSIGNED_INT,
-            0);
+        glDrawArrays(GL_TRIANGLES, 0, fullVertexData.size() / 5);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
@@ -366,7 +388,6 @@ int main(void)
 
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
 
     glfwTerminate();
     return 0;
