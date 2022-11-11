@@ -8,6 +8,23 @@
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
 
+/* Global Variables */
+float x_mod = 0;
+
+void Key_Callback(GLFWwindow* window,
+    int key,
+    int scancode,
+    int action,
+    int mods)
+{
+    // when user presses D
+    if (key == GLFW_KEY_D &&
+        action == GLFW_PRESS) {
+        // move bunny to the right
+        x_mod += 0.1f;
+    }
+}
+
 int main(void)
 {
     GLFWwindow* window;
@@ -28,6 +45,9 @@ int main(void)
     glfwMakeContextCurrent(window);
     /* Initialize GLAD */
     gladLoadGL();
+
+    /* Set Callback function */
+    glfwSetKeyCallback(window, Key_Callback);
 
     /* Load Vertex/Fragment Shaders*/
     // vertex shader
@@ -130,6 +150,9 @@ int main(void)
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
+
+        unsigned int xLoc = glGetUniformLocation(shaderProg, "x");
+        glUniform1f(xLoc, x_mod);
 
         /* Apply Shaders */
         glUseProgram(shaderProg);
