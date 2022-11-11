@@ -51,6 +51,13 @@ int main(void)
     /* Initialize GLAD */
     gladLoadGL();
 
+    /* Screen Space */
+    // Should be same size as window
+    glViewport(0, 0, 640, 480);
+
+
+
+
     /* Set Callback function */
     glfwSetKeyCallback(window, Key_Callback);
 
@@ -180,6 +187,13 @@ int main(void)
             glm::radians(theta),
             glm::normalize(glm::vec3(rot_x, rot_y, rot_z)));
 
+    glm::mat4 projection = glm::ortho(-2.0f,
+        2.0f,
+        -2.0f,
+        2.0f,
+        -1.f,
+        1.0f);
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -203,12 +217,17 @@ int main(void)
             glm::radians(theta),
             glm::normalize(glm::vec3(rot_x, rot_y, rot_z)));
 
+        unsigned int projLoc = glGetUniformLocation(shaderProg, "projection");
+        glUniformMatrix4fv(projLoc,
+            1,
+            GL_FALSE,
+            glm::value_ptr(projection));
+
         unsigned int transformLoc = glGetUniformLocation(shaderProg, "transform");
         glUniformMatrix4fv(transformLoc,
             1,
             GL_FALSE,
             glm::value_ptr(transformation_matrix));
-
 
         /* Apply Shaders */
         glUseProgram(shaderProg);
