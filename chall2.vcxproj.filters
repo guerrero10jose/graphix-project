@@ -27,4 +27,10 @@
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <None Include="Shaders\sample.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <CopyFileToFolders Include="Shaders\sample.frag" />
+  </ItemGroup>
 </Project>

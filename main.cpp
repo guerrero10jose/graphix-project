@@ -1,6 +1,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#include <string>
+#include <iostream>
+
 // tinyloader
 #define TINYOBJLOADER_IMPLEMENTATION
 #include "tiny_obj_loader.h"
@@ -25,6 +28,38 @@ int main(void)
     glfwMakeContextCurrent(window);
     /* Initialize GLAD */
     gladLoadGL();
+
+    /* Load Vertex/Fragment Shaders*/
+    // vertex shader
+    std::fstream vertSrc("Shaders/sample.vert");
+    std::stringstream vertBuff;
+    vertBuff << vertSrc.rdbuf();
+    std::string vertS = vertBuff.str();
+    const char* v = vertS.c_str();
+
+    // fragment shader
+    std::fstream fragSrc("Shaders/sample.frag");
+    std::stringstream fragBuff;
+    fragBuff << fragSrc.rdbuf();
+
+    std::string fragS = fragBuff.str();
+    const char* f = fragS.c_str();
+
+    // compile
+    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &v, NULL);
+    glCompileShader(vertexShader);
+
+    GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragShader, 1, &f, NULL);
+    glCompileShader(fragShader);
+
+    GLuint shaderProg = glCreateProgram();
+    glAttachShader(shaderProg, vertexShader);
+    glAttachShader(shaderProg, fragShader);
+
+    // finalize
+    glLinkProgram(shaderProg);
 
     /* Initialize Mesh Stuff*/
     std::string path = "3D/bunny.obj";
@@ -67,7 +102,7 @@ int main(void)
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER,
-        sizeof(attributes.vertices) * attributes.vertices.size(),
+        sizeof(GL_FLOAT) * attributes.vertices.size(),
         &attributes.vertices[0],
         GL_STATIC_DRAW);
 
@@ -75,7 +110,7 @@ int main(void)
         3,
         GL_FLOAT,
         GL_FALSE,
-        3 * sizeof(float),
+        3 * sizeof(GL_FLOAT),
         (void*)0);
 
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
@@ -95,6 +130,11 @@ int main(void)
     {
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT);
+
+        /* Apply Shaders */
+        glUseProgram(shaderProg);
+
+        glBindVertexArray(VAO);
 
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES,
