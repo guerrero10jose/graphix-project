@@ -8,6 +8,10 @@ uniform vec3 lightColor;
 uniform float ambientStr;
 uniform vec3 ambientColor;
 
+uniform vec3 cameraPos;
+uniform float specStr;
+uniform float specPhong;
+
 in vec2 texCoord;
 in vec3 normCoord;
 in vec3 fragPos;
@@ -28,8 +32,16 @@ void main() {
 	// get the ambient light
 	vec3 ambientCol = ambientColor * ambientStr;
 
+	// get view direction and reflection vector
+	vec3 viewDir = normalize(cameraPos - fragPos);
+	vec3 reflectDir = reflect(-lightDir, normal);
+
+	// get specular light
+	float spec = pow(max(dot(reflectDir, viewDir), 0.1), specPhong);
+	vec3 specColor = spec * specStr * lightColor;
+
 	// apply the lighting to the texture on the fragment
-	FragColor = vec4(diffuse + ambientCol, 1.0f) * texture(tex0, texCoord);
+	FragColor = vec4(specColor + diffuse + ambientCol, 1.0f) * texture(tex0, texCoord);
 
 	//FragColor = texture(tex0, texCoord);
 }

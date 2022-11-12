@@ -338,6 +338,9 @@ int main(void)
     float ambientStr = 0.1f;
     glm::vec3 ambientColor = lightColor;
 
+    float specStr = 0.5f;
+    float specPhong = 16.0f;
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -425,6 +428,18 @@ int main(void)
         glUniform3fv(ambientColorAddress,
             1,
             glm::value_ptr(ambientColor));
+
+        // specphong stuff
+        unsigned int cameraPosAddress = glGetUniformLocation(shaderProg, "cameraPos");
+        glUniform3fv(cameraPosAddress,
+            1,
+            glm::value_ptr(cameraPos));
+
+        unsigned int specStrAddress = glGetUniformLocation(shaderProg, "specStr");
+        glUniform1f(specStrAddress, specStr);
+
+        unsigned int specPhongAddress = glGetUniformLocation(shaderProg, "specPhong");
+        glUniform1f(specPhongAddress, specPhong);
             
         unsigned int projLoc = glGetUniformLocation(shaderProg, "projection");
         glUniformMatrix4fv(projLoc,
