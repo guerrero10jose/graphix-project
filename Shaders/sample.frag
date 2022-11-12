@@ -5,6 +5,9 @@ uniform sampler2D tex0;
 uniform vec3 lightPos;
 uniform vec3 lightColor;
 
+uniform float ambientStr;
+uniform vec3 ambientColor;
+
 in vec2 texCoord;
 in vec3 normCoord;
 in vec3 fragPos;
@@ -22,8 +25,11 @@ void main() {
 	float diff = max(dot(normal, lightDir), 0.0f);
 	vec3 diffuse = diff * lightColor;
 
+	// get the ambient light
+	vec3 ambientCol = ambientColor * ambientStr;
+
 	// apply the lighting to the texture on the fragment
-	FragColor = vec4(diffuse, 1.0f) * texture(tex0, texCoord);
+	FragColor = vec4(diffuse + ambientCol, 1.0f) * texture(tex0, texCoord);
 
 	//FragColor = texture(tex0, texCoord);
 }

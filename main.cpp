@@ -335,6 +335,9 @@ int main(void)
     glm::vec3 lightPos = glm::vec3(-10, 3, 0);
     glm::vec3 lightColor = glm::vec3(1, 1, 1);
 
+    float ambientStr = 0.1f;
+    glm::vec3 ambientColor = lightColor;
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -402,6 +405,8 @@ int main(void)
         glBindTexture(GL_TEXTURE_2D, texture);
         glUniform1i(tex0Address, 0);
 
+
+        // diffuse stuff
         unsigned int lightAddress = glGetUniformLocation(shaderProg, "lightPos");
         glUniform3fv(lightAddress,
             1,
@@ -412,6 +417,15 @@ int main(void)
             1,
             glm::value_ptr(lightColor));
 
+        // ambient stuff
+        unsigned int ambientStrAddress = glGetUniformLocation(shaderProg, "ambientStr");
+        glUniform1f(ambientStrAddress, ambientStr);
+
+        unsigned int ambientColorAddress = glGetUniformLocation(shaderProg, "ambientColor");
+        glUniform3fv(ambientColorAddress,
+            1,
+            glm::value_ptr(ambientColor));
+            
         unsigned int projLoc = glGetUniformLocation(shaderProg, "projection");
         glUniformMatrix4fv(projLoc,
             1,
