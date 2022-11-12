@@ -35,6 +35,28 @@ void Key_Callback(GLFWwindow* window,
     }
 }
 
+/* Requirement: Camera Class */
+class Camera {
+
+};
+
+// orthographic camera class
+class Ortho: public Camera {
+
+};
+
+// perspective camera class
+class Persp : public Camera {
+
+    // old code used for previous implementation
+    glm::mat4 projection = glm::ortho(-2.0f,
+        2.0f,
+        -2.0f,
+        2.0f,
+        -1.0f,
+        1.0f);
+};
+
 int main(void)
 {
     GLFWwindow* window;
@@ -241,19 +263,30 @@ int main(void)
         8 * sizeof(GL_FLOAT),
         (void*)0);
 
-    GLintptr uvPtr = 6 * sizeof(float);
+    // norm ptr
+    GLintptr normPtr = 3 * sizeof(float);
+    glVertexAttribPointer(
+        1,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        8 * sizeof(GL_FLOAT),
+        (void*)normPtr
+    );
 
+    // uv ptr
+    GLintptr uvPtr = 6 * sizeof(float);
     glVertexAttribPointer(
         2,
         2,
         GL_FLOAT,
         GL_FALSE,
-        8 * sizeof(float),
+        8 * sizeof(GL_FLOAT),
         (void*)uvPtr
     );
 
-
     glEnableVertexAttribArray(0);
+    glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -290,12 +323,17 @@ int main(void)
             glm::radians(theta),
             glm::normalize(glm::vec3(rot_x, rot_y, rot_z)));
 
+    // perspective camera
     glm::mat4 projection = glm::perspective(
         glm::radians(60.0f),
         window_height / window_width,
         0.1f,
         100.0f
     );
+
+    /* Lighting Variables */
+    glm::vec3 lightPos = glm::vec3(-10, 3, 0);
+    glm::vec3 lightColor = glm::vec3(1, 1, 1);
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -349,7 +387,7 @@ int main(void)
 
         // translation
         transformation_matrix = glm::translate(transformation_matrix,
-            glm::vec3(x, y, z -5.0f));
+            glm::vec3(x, y, z -5.f));
 
         // scale
         transformation_matrix = glm::scale(transformation_matrix,
@@ -363,6 +401,16 @@ int main(void)
         GLuint tex0Address = glGetUniformLocation(shaderProg, "tex0");
         glBindTexture(GL_TEXTURE_2D, texture);
         glUniform1i(tex0Address, 0);
+
+        unsigned int lightAddress = glGetUniformLocation(shaderProg, "lightPos");
+        glUniform3fv(lightAddress,
+            1,
+            glm::value_ptr(lightPos));
+
+        unsigned int lightColorAddress = glGetUniformLocation(shaderProg, "lightColor");
+        glUniform3fv(lightColorAddress,
+            1,
+            glm::value_ptr(lightColor));
 
         unsigned int projLoc = glGetUniformLocation(shaderProg, "projection");
         glUniformMatrix4fv(projLoc,
