@@ -21,6 +21,12 @@ out vec4 FragColor;
 void main() {
 	// FragColor = vec4(0.7f, 0f, 0f, 1f);
 
+	// Current pixel
+	vec4 pixelColor = texture(tex0, texCoord);
+	if(pixelColor.a < 0.1) {
+		discard;
+	}
+
 	// get required parameter for diffuse formula
 	vec3 normal = normalize(normCoord);
 	vec3 lightDir = normalize(lightPos - fragPos);
@@ -41,7 +47,7 @@ void main() {
 	vec3 specColor = spec * specStr * lightColor;
 
 	// apply the lighting to the texture on the fragment
-	FragColor = vec4(specColor + diffuse + ambientCol, 1.0f) * texture(tex0, texCoord);
+	FragColor = vec4(specColor + diffuse + ambientCol, 1.0f) * pixelColor;
 
 	//FragColor = texture(tex0, texCoord);
 }

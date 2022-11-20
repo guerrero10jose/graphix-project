@@ -85,7 +85,7 @@ int main(void)
     stbi_set_flip_vertically_on_load(true);
 
     unsigned char* tex_bytes =
-        stbi_load("3D/partenza.jpg",
+        stbi_load("3D/gradient.png",
             &img_width,
             &img_height,
             &colorChannels,
@@ -99,11 +99,11 @@ int main(void)
 
     glTexImage2D(GL_TEXTURE_2D,
         0,
-        GL_RGB,
+        GL_RGBA,
         img_width,
         img_height,
         0,
-        GL_RGB,
+        GL_RGBA,
         GL_UNSIGNED_BYTE,
         tex_bytes);
 
@@ -288,7 +288,7 @@ int main(void)
     stbi_set_flip_vertically_on_load(true);
 
     /* Initialize Mesh Stuff*/
-    std::string path = "3D/djSword.obj";
+    std::string path = "3D/plane.obj";
     std::vector<tinyobj::shape_t> shapes;
     std::vector<tinyobj::material_t> material;
     std::string warning, error;
@@ -441,7 +441,7 @@ int main(void)
             glm::vec3(x, y, z));
 
     float scale_x, scale_y, scale_z;
-    scale_x = scale_y = scale_z = 0.1f;
+    scale_x = scale_y = scale_z = 5.f;
 
     glm::mat4 scale =
         glm::scale(identity_matrix4,
@@ -449,9 +449,9 @@ int main(void)
 
     float rot_x, rot_y, rot_z;
     rot_x = rot_y = rot_z = 0;
-    rot_y = 1.0f;
+    rot_z = 1.0f;
 
-    float theta = 90.0f;
+    float theta = -90.0f;
 
     glm::mat4 rotation =
         glm::rotate(identity_matrix4,
@@ -467,7 +467,7 @@ int main(void)
     );
 
     /* Lighting Variables */
-    glm::vec3 lightPos = glm::vec3(-10, 3, 0);
+    glm::vec3 lightPos = glm::vec3(0, 10, 0);
     glm::vec3 lightColor = glm::vec3(1, 1, 1);
 
     float ambientStr = 0.1f;
@@ -482,7 +482,10 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        theta += 0.1f;
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+        //theta += 0.1f;
 
         /* Camera */
         // camera position
