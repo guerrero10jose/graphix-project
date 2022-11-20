@@ -152,6 +152,141 @@ int main(void)
     // finalize
     glLinkProgram(shaderProg);
 
+    //////////////////////////////////
+    /* Skybox */
+    // vertex shader
+    std::fstream skybox_vertSrc("Shaders/skybox.vert");
+    std::stringstream skybox_vertBuff;
+    skybox_vertBuff << skybox_vertSrc.rdbuf();
+    std::string skybox_vertS = skybox_vertBuff.str();
+    const char* skybox_v = skybox_vertS.c_str();
+
+    // fragment shader
+    std::fstream skybox_fragSrc("Shaders/skybox.frag");
+    std::stringstream skybox_fragBuff;
+    skybox_fragBuff << skybox_fragSrc.rdbuf();
+
+    std::string skybox_fragS = skybox_fragBuff.str();
+    const char* skybox_f = skybox_fragS.c_str();
+
+    // compile
+    GLuint skybox_vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(skybox_vertexShader, 1, &skybox_v, NULL);
+    glCompileShader(skybox_vertexShader);
+
+    GLuint skybox_fragShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(skybox_fragShader, 1, &skybox_f, NULL);
+    glCompileShader(skybox_fragShader);
+
+    GLuint skybox_shaderProg = glCreateProgram();
+    glAttachShader(skybox_shaderProg, skybox_vertexShader);
+    glAttachShader(skybox_shaderProg, skybox_fragShader);
+
+    // finalize
+    glLinkProgram(skybox_shaderProg);
+
+    /*
+      7--------6
+     /|       /|
+    4--------5 |
+    | |      | |
+    | 3------|-2
+    |/       |/
+    0--------1
+    */
+    //Vertices for the cube
+    float skyboxVertices[]{
+        -1.f, -1.f, 1.f, //0
+        1.f, -1.f, 1.f,  //1
+        1.f, -1.f, -1.f, //2
+        -1.f, -1.f, -1.f,//3
+        -1.f, 1.f, 1.f,  //4
+        1.f, 1.f, 1.f,   //5
+        1.f, 1.f, -1.f,  //6
+        -1.f, 1.f, -1.f  //7
+    };
+
+    //Skybox Indices
+    unsigned int skyboxIndices[]{
+        1,2,6,
+        6,5,1,
+
+        0,4,7,
+        7,3,0,
+
+        4,5,6,
+        6,7,4,
+
+        0,3,2,
+        2,1,0,
+
+        0,1,5,
+        5,4,0,
+
+        3,7,6,
+        6,2,3
+    };
+
+    unsigned int skyboxVAO, skyboxVBO, skyboxEBO;
+    glGenVertexArrays(1, &skyboxVAO);
+    glGenBuffers(1, &skyboxVBO);
+    glGenBuffers(1, &skyboxEBO);
+
+    glBindVertexArray(skyboxVAO);
+    glBindBuffer(GL_ARRAY_BUFFER, skyboxVBO);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(skyboxVertices), &skyboxVertices, GL_STATIC_DRAW);
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, skyboxEBO);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GL_INT) * 36, &skyboxIndices, GL_STATIC_DRAW);
+    glEnableVertexAttribArray(0);
+
+    std::string facesSkybox[]{
+        "Skybox/rainbow_rt.png",
+        "Skybox/rainbow_lf.png",
+        "Skybox/rainbow_up.png",
+        "Skybox/rainbow_dn.png",
+        "Skybox/rainbow_ft.png",
+        "Skybox/rainbow_bk.png"
+    };
+
+    unsigned int skyboxTex;
+    glGenTextures(1, &skyboxTex);
+    glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+    glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+    for (unsigned int i = 0; i < 6; i++) {
+        int w, h, skyCChannel;
+
+        stbi_set_flip_vertically_on_load(false);
+
+        unsigned char* data = stbi_load(facesSkybox[i].c_str(), &w, &h, &skyCChannel, 0);
+
+        if (data) {
+            glTexImage2D(
+                GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+                0,
+                GL_RGB,
+                w,
+                h,
+                0,
+                GL_RGB,
+                GL_UNSIGNED_BYTE,
+                data
+            );
+
+            stbi_image_free(data);
+        }
+    }
+
+    stbi_set_flip_vertically_on_load(true);
+
     /* Initialize Mesh Stuff*/
     std::string path = "3D/djSword.obj";
     std::vector<tinyobj::shape_t> shapes;
@@ -388,6 +523,35 @@ int main(void)
 
         //glm::mat4 viewMatrix = cameraOrientation * cameraPositionMatrix;
         glm::mat4 viewMatrix = glm::lookAt(cameraPos, Center, WorldUp);
+
+        // load skybox
+        glDepthMask(GL_FALSE);
+        glDepthFunc(GL_LEQUAL);
+        glUseProgram(skybox_shaderProg);
+
+        glm::mat4 sky_view = glm::mat4(1.f);
+        sky_view = glm::mat4(glm::mat3(viewMatrix));
+
+        unsigned int sky_projLoc = glGetUniformLocation(skybox_shaderProg, "projection");
+        glUniformMatrix4fv(sky_projLoc,
+            1,
+            GL_FALSE,
+            glm::value_ptr(projection));
+
+        unsigned int sky_viewLoc = glGetUniformLocation(skybox_shaderProg, "view");
+        glUniformMatrix4fv(sky_viewLoc,
+            1,
+            GL_FALSE,
+            glm::value_ptr(sky_view));
+
+        glBindVertexArray(skyboxVAO);
+        glActiveTexture(GL_TEXTURE0);
+        glBindTexture(GL_TEXTURE_CUBE_MAP, skyboxTex);
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        glDepthMask(GL_TRUE);
+        glDepthFunc(GL_LESS);
+
+        glUseProgram(shaderProg);
 
         glm::mat4 transformation_matrix = glm::mat4(1.0f);
 
