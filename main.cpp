@@ -20,6 +20,7 @@
 /* Global Variables */
 float window_height = 600.0f, window_width = 600.0f;
 float x_mod = 0;
+float x_cam = 0;
 
 void Key_Callback(GLFWwindow* window,
     int key,
@@ -29,9 +30,15 @@ void Key_Callback(GLFWwindow* window,
 {
     // when user presses D
     if (key == GLFW_KEY_D &&
-        action == GLFW_PRESS) {
+        action == GLFW_REPEAT) {
         // move bunny to the right
-        x_mod += 10.0f;
+        x_cam -= 0.5f;
+    }
+
+    if (key == GLFW_KEY_A &&
+        action == GLFW_REPEAT) {
+        // move bunny to the right
+        x_cam += 0.5f;
     }
 }
 
@@ -66,7 +73,7 @@ int main(void)
         return -1;
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(window_width, window_height, "Hello World", NULL, NULL);
+    window = glfwCreateWindow(window_width, window_height, "Jose Gerardo Guerrero", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -85,7 +92,7 @@ int main(void)
     stbi_set_flip_vertically_on_load(true);
 
     unsigned char* tex_bytes =
-        stbi_load("3D/gradient.png",
+        stbi_load("3D/brickwall.jpg",
             &img_width,
             &img_height,
             &colorChannels,
@@ -94,21 +101,53 @@ int main(void)
     GLuint texture;
 
     glGenTextures(1, &texture);
-    glActiveTexture(GL_TEXTURE);
+    glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
 
     glTexImage2D(GL_TEXTURE_2D,
         0,
-        GL_RGBA,
+        GL_RGB,
         img_width,
         img_height,
         0,
-        GL_RGBA,
+        GL_RGB,
         GL_UNSIGNED_BYTE,
         tex_bytes);
 
     glGenerateMipmap(GL_TEXTURE_2D);
     stbi_image_free(tex_bytes);
+
+    int img_width2,
+        img_height2,
+        colorChannels2;
+
+    stbi_set_flip_vertically_on_load(true);
+
+    unsigned char* norm_bytes =
+        stbi_load("3D/brickwall_normal.jpg",
+            &img_width2,
+            &img_height2,
+            &colorChannels2,
+            0);
+
+    GLuint norm_tex;
+
+    glGenTextures(1, &norm_tex);
+    glActiveTexture(GL_TEXTURE1);
+    glBindTexture(GL_TEXTURE_2D, norm_tex);
+
+    glTexImage2D(GL_TEXTURE_2D,
+        0,
+        GL_RGB,
+        img_width,
+        img_height,
+        0,
+        GL_RGB,
+        GL_UNSIGNED_BYTE,
+        norm_bytes);
+
+    glGenerateMipmap(GL_TEXTURE_2D);
+    stbi_image_free(norm_bytes);
 
     // depth testing
     glEnable(GL_DEPTH_TEST);
@@ -242,8 +281,8 @@ int main(void)
     glEnableVertexAttribArray(0);
 
     std::string facesSkybox[]{
-        "Skybox/rainbow_rt.png",
         "Skybox/rainbow_lf.png",
+        "Skybox/rainbow_rt.png",
         "Skybox/rainbow_up.png",
         "Skybox/rainbow_dn.png",
         "Skybox/rainbow_ft.png",
@@ -319,6 +358,72 @@ int main(void)
         mesh_indices.push_back(shapes[0].mesh.indices[i].vertex_index);
     }
 
+    std::vector<glm::vec3> tangents;
+    std::vector<glm::vec3> bitangents;
+
+    for (int i = 0; i < shapes[0].mesh.indices.size(); i += 3) {
+
+        // v1, v2, v3
+        tinyobj::index_t vData1 = shapes[0].mesh.indices[i];
+        tinyobj::index_t vData2 = shapes[0].mesh.indices[i + 1];
+        tinyobj::index_t vData3 = shapes[0].mesh.indices[i + 2];
+
+        // components of v1
+        glm::vec3 v1 = glm::vec3(
+            attributes.vertices[vData1.vertex_index * 3],
+            attributes.vertices[vData1.vertex_index * 3 + 1],
+            attributes.vertices[vData1.vertex_index * 3 + 2]
+        );
+
+        // components of v2
+        glm::vec3 v2 = glm::vec3(
+            attributes.vertices[vData2.vertex_index * 3],
+            attributes.vertices[vData2.vertex_index * 3 + 1],
+            attributes.vertices[vData2.vertex_index * 3 + 2]
+        );
+
+        // components of v3
+        glm::vec3 v3 = glm::vec3(
+            attributes.vertices[vData3.vertex_index * 3],
+            attributes.vertices[vData3.vertex_index * 3 + 1],
+            attributes.vertices[vData3.vertex_index * 3 + 2]
+        );
+
+        glm::vec2 uv1 = glm::vec2(
+            attributes.texcoords[vData1.texcoord_index * 2],
+            attributes.texcoords[vData1.texcoord_index * 2 + 1]
+        );
+
+        glm::vec2 uv2 = glm::vec2(
+            attributes.texcoords[vData2.texcoord_index * 2],
+            attributes.texcoords[vData2.texcoord_index * 2 + 1]
+        );
+
+        glm::vec2 uv3 = glm::vec2(
+            attributes.texcoords[vData3.texcoord_index * 2],
+            attributes.texcoords[vData3.texcoord_index * 2 + 1]
+        );
+
+        glm::vec3 deltaPos1 = v2 - v1;
+        glm::vec3 deltaPos2 = v3 - v1;
+
+        glm::vec2 deltaUV1 = uv2 - uv1;
+        glm::vec2 deltaUV2 = uv3 - uv1;
+
+        float r = 1.f / ((deltaUV1.x * deltaUV2.y) - (deltaUV1.y * deltaUV2.x));
+
+        glm::vec3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
+        glm::vec3 bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
+
+        tangents.push_back(tangent);
+        tangents.push_back(tangent);
+        tangents.push_back(tangent);
+
+        bitangents.push_back(bitangent);
+        bitangents.push_back(bitangent);
+        bitangents.push_back(bitangent);
+    }
+
     std::vector<GLfloat> fullVertexData;
 
     for (int i = 0; i < shapes[0].mesh.indices.size(); i++) {
@@ -367,6 +472,30 @@ int main(void)
             attributes.texcoords[uvIndex + 1]
         );
 
+        fullVertexData.push_back(
+            tangents[i].x
+        );
+
+        fullVertexData.push_back(
+            tangents[i].y
+        );
+
+        fullVertexData.push_back(
+            tangents[i].z
+        );
+
+        fullVertexData.push_back(
+            bitangents[i].x
+        );
+
+        fullVertexData.push_back(
+            bitangents[i].y
+        );
+
+        fullVertexData.push_back(
+            bitangents[i].z
+        );
+
     }
 
     GLfloat vertices[]{
@@ -395,7 +524,7 @@ int main(void)
         3,
         GL_FLOAT,
         GL_FALSE,
-        8 * sizeof(GL_FLOAT),
+        14 * sizeof(GL_FLOAT),
         (void*)0);
 
     // norm ptr
@@ -405,7 +534,7 @@ int main(void)
         3,
         GL_FLOAT,
         GL_FALSE,
-        8 * sizeof(GL_FLOAT),
+        14 * sizeof(GL_FLOAT),
         (void*)normPtr
     );
 
@@ -416,13 +545,36 @@ int main(void)
         2,
         GL_FLOAT,
         GL_FALSE,
-        8 * sizeof(GL_FLOAT),
+        14 * sizeof(GL_FLOAT),
         (void*)uvPtr
+    );
+
+    GLintptr tangentPtr = 8 * sizeof(float);
+    GLintptr bitangentPtr = 11 * sizeof(float);
+
+    glVertexAttribPointer(
+        3,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        14 * sizeof(GL_FLOAT),
+        (void*)tangentPtr
+    );
+
+    glVertexAttribPointer(
+        4,
+        3,
+        GL_FLOAT,
+        GL_FALSE,
+        14 * sizeof(GL_FLOAT),
+        (void*)bitangentPtr
     );
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
+    glEnableVertexAttribArray(3);
+    glEnableVertexAttribArray(4);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -449,9 +601,8 @@ int main(void)
 
     float rot_x, rot_y, rot_z;
     rot_x = rot_y = rot_z = 0;
-    rot_z = 1.0f;
-
-    float theta = -90.0f;
+    rot_x = 1.0f;
+    float theta = -90.f;
 
     glm::mat4 rotation =
         glm::rotate(identity_matrix4,
@@ -467,14 +618,14 @@ int main(void)
     );
 
     /* Lighting Variables */
-    glm::vec3 lightPos = glm::vec3(0, 10, 0);
+    glm::vec3 lightPos = glm::vec3(0, 5, 0);
     glm::vec3 lightColor = glm::vec3(1, 1, 1);
 
-    float ambientStr = 0.1f;
+    float ambientStr = 0.2f;
     glm::vec3 ambientColor = lightColor;
 
-    float specStr = 0.5f;
-    float specPhong = 16.0f;
+    float specStr = 3.f;
+    float specPhong = 25.0f;
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -482,14 +633,17 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+
         glEnable(GL_BLEND);
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        //glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_DST_COLOR);
+        //glBlendEquation(GL_FUNC_SUBTRACT);
 
-        //theta += 0.1f;
+        theta += 0.1f;
 
         /* Camera */
         // camera position
-        glm::vec3 cameraPos = glm::vec3(0, 0, 10.f);
+        glm::vec3 cameraPos = glm::vec3(x_cam, 0, 10.f);
 
         glm::mat4 cameraPositionMatrix =
             glm::translate(glm::mat4(1.0f),
@@ -571,10 +725,15 @@ int main(void)
             glm::radians(theta),
             glm::normalize(glm::vec3(rot_x, rot_y, rot_z)));
 
+        glActiveTexture(GL_TEXTURE0);
         GLuint tex0Address = glGetUniformLocation(shaderProg, "tex0");
         glBindTexture(GL_TEXTURE_2D, texture);
         glUniform1i(tex0Address, 0);
 
+        glActiveTexture(GL_TEXTURE1);
+        GLuint tex1Address = glGetUniformLocation(shaderProg, "norm_tex");
+        glBindTexture(GL_TEXTURE_2D, norm_tex);
+        glUniform1i(tex1Address, 1);
 
         // diffuse stuff
         unsigned int lightAddress = glGetUniformLocation(shaderProg, "lightPos");

@@ -1,6 +1,7 @@
 #version 330 core // version
 
 uniform sampler2D tex0;
+uniform sampler2D norm_tex;
 
 uniform vec3 lightPos;
 uniform vec3 lightColor;
@@ -16,6 +17,8 @@ in vec2 texCoord;
 in vec3 normCoord;
 in vec3 fragPos;
 
+in mat3 TBN;
+
 out vec4 FragColor;
 
 void main() {
@@ -28,7 +31,10 @@ void main() {
 	}
 
 	// get required parameter for diffuse formula
-	vec3 normal = normalize(normCoord);
+	vec3 normal = texture(norm_tex, texCoord).rgb;
+	normal = normalize(normal * 2.0 - 1.0);
+	normal = normalize(TBN * normal);
+
 	vec3 lightDir = normalize(lightPos - fragPos);
 
 	// apply formula and multiply with light color
