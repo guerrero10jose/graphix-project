@@ -434,6 +434,7 @@ int main(void)
         int uvIndex = vData.texcoord_index * 2;
         int normsIndex = vData.normal_index * 3;
 
+
         // X
         fullVertexData.push_back(
             attributes.vertices[vertexIndex]
