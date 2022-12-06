@@ -149,6 +149,8 @@
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="camera.h" />
+    <ClInclude Include="shaders.h" />
     <ClInclude Include="stb_image.h" />
     <ClInclude Include="tiny_obj_loader.h" />
   </ItemGroup>
@@ -171,6 +173,9 @@
   <ItemGroup>
     <None Include="Shaders\skybox.frag" />
     <None Include="Shaders\skybox.vert" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="3D\textures\shark.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

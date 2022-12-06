@@ -29,6 +29,12 @@
     <ClInclude Include="stb_image.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="shaders.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="camera.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <CopyFileToFolders Include="Shaders\sample.frag" />
@@ -37,5 +43,10 @@
   <ItemGroup>
     <None Include="Shaders\skybox.vert" />
     <None Include="Shaders\skybox.frag" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="3D\textures\shark.png">
+      <Filter>Resource Files</Filter>
+    </Image>
   </ItemGroup>
 </Project>

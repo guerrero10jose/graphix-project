@@ -9,18 +9,17 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
-// tinyloader
-#define TINYOBJLOADER_IMPLEMENTATION
-#include "tiny_obj_loader.h"
-
-// textures
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
+// other headers
+#include "models.h"
+#include "shaders.h"
+#include "camera.h"
 
 /* Global Variables */
-float window_height = 600.0f, window_width = 600.0f;
-float x_mod = 0;
-float x_cam = 0;
+float window_height = 800.f, window_width = 800.f;
+float x_mod = 0, x_cam = 0, y_cam = 0;
+
+// Camera (perspective initial)
+Camera camera(window_width, window_height);
 
 void Key_Callback(GLFWwindow* window,
     int key,
@@ -32,37 +31,32 @@ void Key_Callback(GLFWwindow* window,
     if (key == GLFW_KEY_D &&
         action == GLFW_REPEAT) {
         // move bunny to the right
-        x_cam -= 0.5f;
+        x_cam -= 1.0f;
     }
 
     if (key == GLFW_KEY_A &&
         action == GLFW_REPEAT) {
         // move bunny to the right
-        x_cam += 0.5f;
+        x_cam += 1.0f;
+    }
+
+    if (key == GLFW_KEY_1 &&
+        action == GLFW_PRESS) {
+        camera.changePersp();
+    }
+
+    if (key == GLFW_KEY_W &&
+        action == GLFW_REPEAT) {
+        // move bunny to the right
+        y_cam += 1.0f;
+    }
+
+    if (key == GLFW_KEY_S &&
+        action == GLFW_REPEAT) {
+        // move bunny to the right
+        y_cam -= 1.0f;
     }
 }
-
-/* Requirement: Camera Class */
-class Camera {
-
-};
-
-// orthographic camera class
-class Ortho: public Camera {
-
-};
-
-// perspective camera class
-class Persp : public Camera {
-
-    // old code used for previous implementation
-    glm::mat4 projection = glm::ortho(-2.0f,
-        2.0f,
-        -2.0f,
-        2.0f,
-        -1.0f,
-        1.0f);
-};
 
 int main(void)
 {
@@ -73,7 +67,7 @@ int main(void)
         return -1;
 
     /* Create a windowed mode window and its OpenGL context */
-    window = glfwCreateWindow(window_width, window_height, "Jose Gerardo Guerrero", NULL, NULL);
+    window = glfwCreateWindow(window_width, window_height, "Machine Project", NULL, NULL);
     if (!window)
     {
         glfwTerminate();
@@ -85,141 +79,36 @@ int main(void)
     /* Initialize GLAD */
     gladLoadGL();
 
-    int img_width,
-        img_height,
-        colorChannels;
-
-    stbi_set_flip_vertically_on_load(true);
-
-    unsigned char* tex_bytes =
-        stbi_load("3D/brickwall.jpg",
-            &img_width,
-            &img_height,
-            &colorChannels,
-            0);
-
-    GLuint texture;
-
-    glGenTextures(1, &texture);
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    glTexImage2D(GL_TEXTURE_2D,
-        0,
-        GL_RGB,
-        img_width,
-        img_height,
-        0,
-        GL_RGB,
-        GL_UNSIGNED_BYTE,
-        tex_bytes);
-
-    glGenerateMipmap(GL_TEXTURE_2D);
-    stbi_image_free(tex_bytes);
-
-    int img_width2,
-        img_height2,
-        colorChannels2;
-
-    stbi_set_flip_vertically_on_load(true);
-
-    unsigned char* norm_bytes =
-        stbi_load("3D/brickwall_normal.jpg",
-            &img_width2,
-            &img_height2,
-            &colorChannels2,
-            0);
-
-    GLuint norm_tex;
-
-    glGenTextures(1, &norm_tex);
-    glActiveTexture(GL_TEXTURE1);
-    glBindTexture(GL_TEXTURE_2D, norm_tex);
-
-    glTexImage2D(GL_TEXTURE_2D,
-        0,
-        GL_RGB,
-        img_width,
-        img_height,
-        0,
-        GL_RGB,
-        GL_UNSIGNED_BYTE,
-        norm_bytes);
-
-    glGenerateMipmap(GL_TEXTURE_2D);
-    stbi_image_free(norm_bytes);
-
     // depth testing
     glEnable(GL_DEPTH_TEST);
+    glViewport(0, 0, window_width, window_height);
+    glEnable(GL_SCISSOR_TEST);
 
     /* Screen Space */
     // Should be same size as window
-    //glViewport(0, 0, 640, 480);
+    // glViewport(0, 0, window_width, window_height);
 
     /* Set Callback function */
     glfwSetKeyCallback(window, Key_Callback);
 
     /* Load Vertex/Fragment Shaders*/
-    // vertex shader
-    std::fstream vertSrc("Shaders/sample.vert");
-    std::stringstream vertBuff;
-    vertBuff << vertSrc.rdbuf();
-    std::string vertS = vertBuff.str();
-    const char* v = vertS.c_str();
-
-    // fragment shader
-    std::fstream fragSrc("Shaders/sample.frag");
-    std::stringstream fragBuff;
-    fragBuff << fragSrc.rdbuf();
-
-    std::string fragS = fragBuff.str();
-    const char* f = fragS.c_str();
-
-    // compile
-    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertexShader, 1, &v, NULL);
-    glCompileShader(vertexShader);
-
-    GLuint fragShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragShader, 1, &f, NULL);
-    glCompileShader(fragShader);
+    // For Objects
+    Shader vertexShader("Shaders/sample.vert", 'v');
+    Shader fragShader("Shaders/sample.frag", 'f');
 
     GLuint shaderProg = glCreateProgram();
-    glAttachShader(shaderProg, vertexShader);
-    glAttachShader(shaderProg, fragShader);
-
-    // finalize
+    glAttachShader(shaderProg, vertexShader.getShader());
+    glAttachShader(shaderProg, fragShader.getShader());
     glLinkProgram(shaderProg);
 
-    //////////////////////////////////
-    /* Skybox */
-    // vertex shader
-    std::fstream skybox_vertSrc("Shaders/skybox.vert");
-    std::stringstream skybox_vertBuff;
-    skybox_vertBuff << skybox_vertSrc.rdbuf();
-    std::string skybox_vertS = skybox_vertBuff.str();
-    const char* skybox_v = skybox_vertS.c_str();
-
-    // fragment shader
-    std::fstream skybox_fragSrc("Shaders/skybox.frag");
-    std::stringstream skybox_fragBuff;
-    skybox_fragBuff << skybox_fragSrc.rdbuf();
-
-    std::string skybox_fragS = skybox_fragBuff.str();
-    const char* skybox_f = skybox_fragS.c_str();
-
-    // compile
-    GLuint skybox_vertexShader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(skybox_vertexShader, 1, &skybox_v, NULL);
-    glCompileShader(skybox_vertexShader);
-
-    GLuint skybox_fragShader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(skybox_fragShader, 1, &skybox_f, NULL);
-    glCompileShader(skybox_fragShader);
+    // For Skybox
+    Shader skybox_VS("Shaders/skybox.vert", 'v');
+    Shader skybox_FS("Shaders/skybox.frag", 'f');
 
     GLuint skybox_shaderProg = glCreateProgram();
-    glAttachShader(skybox_shaderProg, skybox_vertexShader);
-    glAttachShader(skybox_shaderProg, skybox_fragShader);
+    glAttachShader(skybox_shaderProg, skybox_VS.getShader());
+    glAttachShader(skybox_shaderProg, skybox_FS.getShader());
+    glLinkProgram(skybox_shaderProg);
 
     // finalize
     glLinkProgram(skybox_shaderProg);
@@ -281,12 +170,12 @@ int main(void)
     glEnableVertexAttribArray(0);
 
     std::string facesSkybox[]{
-        "Skybox/rainbow_lf.png",
-        "Skybox/rainbow_rt.png",
-        "Skybox/rainbow_up.png",
-        "Skybox/rainbow_dn.png",
-        "Skybox/rainbow_ft.png",
-        "Skybox/rainbow_bk.png"
+        "Skybox/ocean/right.png",
+        "Skybox/ocean/left.png",
+        "Skybox/ocean/top.png",
+        "Skybox/ocean/bottom.png",
+        "Skybox/ocean/front.png",
+        "Skybox/ocean/back.png"
     };
 
     unsigned int skyboxTex;
@@ -327,177 +216,10 @@ int main(void)
     stbi_set_flip_vertically_on_load(true);
 
     /* Initialize Mesh Stuff*/
-    std::string path = "3D/plane.obj";
-    std::vector<tinyobj::shape_t> shapes;
-    std::vector<tinyobj::material_t> material;
-    std::string warning, error;
-    tinyobj::attrib_t attributes;
-
-    GLfloat UV[]{
-    0.f, 1.f,
-    0.f, 0.f,
-    1.f, 1.f,
-    1.f, 0.f,
-    1.f, 1.f,
-    1.f, 0.f,
-    0.f, 1.f,
-    0.f, 0.f
-    };
-
-    /* Load the Mesh */
-    bool success = tinyobj::LoadObj(&attributes,
-        &shapes,
-        &material,
-        &warning,
-        &error,
-        path.c_str());
-
-    std::vector<GLuint> mesh_indices;
-
-    for (int i = 0; i < shapes[0].mesh.indices.size(); i++) {
-        mesh_indices.push_back(shapes[0].mesh.indices[i].vertex_index);
-    }
-
-    std::vector<glm::vec3> tangents;
-    std::vector<glm::vec3> bitangents;
-
-    for (int i = 0; i < shapes[0].mesh.indices.size(); i += 3) {
-
-        // v1, v2, v3
-        tinyobj::index_t vData1 = shapes[0].mesh.indices[i];
-        tinyobj::index_t vData2 = shapes[0].mesh.indices[i + 1];
-        tinyobj::index_t vData3 = shapes[0].mesh.indices[i + 2];
-
-        // components of v1
-        glm::vec3 v1 = glm::vec3(
-            attributes.vertices[vData1.vertex_index * 3],
-            attributes.vertices[vData1.vertex_index * 3 + 1],
-            attributes.vertices[vData1.vertex_index * 3 + 2]
-        );
-
-        // components of v2
-        glm::vec3 v2 = glm::vec3(
-            attributes.vertices[vData2.vertex_index * 3],
-            attributes.vertices[vData2.vertex_index * 3 + 1],
-            attributes.vertices[vData2.vertex_index * 3 + 2]
-        );
-
-        // components of v3
-        glm::vec3 v3 = glm::vec3(
-            attributes.vertices[vData3.vertex_index * 3],
-            attributes.vertices[vData3.vertex_index * 3 + 1],
-            attributes.vertices[vData3.vertex_index * 3 + 2]
-        );
-
-        glm::vec2 uv1 = glm::vec2(
-            attributes.texcoords[vData1.texcoord_index * 2],
-            attributes.texcoords[vData1.texcoord_index * 2 + 1]
-        );
-
-        glm::vec2 uv2 = glm::vec2(
-            attributes.texcoords[vData2.texcoord_index * 2],
-            attributes.texcoords[vData2.texcoord_index * 2 + 1]
-        );
-
-        glm::vec2 uv3 = glm::vec2(
-            attributes.texcoords[vData3.texcoord_index * 2],
-            attributes.texcoords[vData3.texcoord_index * 2 + 1]
-        );
-
-        glm::vec3 deltaPos1 = v2 - v1;
-        glm::vec3 deltaPos2 = v3 - v1;
-
-        glm::vec2 deltaUV1 = uv2 - uv1;
-        glm::vec2 deltaUV2 = uv3 - uv1;
-
-        float r = 1.f / ((deltaUV1.x * deltaUV2.y) - (deltaUV1.y * deltaUV2.x));
-
-        glm::vec3 tangent = (deltaPos1 * deltaUV2.y - deltaPos2 * deltaUV1.y) * r;
-        glm::vec3 bitangent = (deltaPos2 * deltaUV1.x - deltaPos1 * deltaUV2.x) * r;
-
-        tangents.push_back(tangent);
-        tangents.push_back(tangent);
-        tangents.push_back(tangent);
-
-        bitangents.push_back(bitangent);
-        bitangents.push_back(bitangent);
-        bitangents.push_back(bitangent);
-    }
-
-    std::vector<GLfloat> fullVertexData;
-
-    for (int i = 0; i < shapes[0].mesh.indices.size(); i++) {
-
-        tinyobj::index_t vData = shapes[0].mesh.indices[i];
-
-        int vertexIndex = vData.vertex_index * 3;
-        int uvIndex = vData.texcoord_index * 2;
-        int normsIndex = vData.normal_index * 3;
-
-
-        // X
-        fullVertexData.push_back(
-            attributes.vertices[vertexIndex]
-        );
-
-        // Y
-        fullVertexData.push_back(
-            attributes.vertices[vertexIndex + 1]
-        );
-
-        // Z
-        fullVertexData.push_back(
-            attributes.vertices[vertexIndex + 2]
-        );
-
-        // normals
-        fullVertexData.push_back(
-            attributes.normals[normsIndex]
-        );
-
-        fullVertexData.push_back(
-            attributes.normals[normsIndex + 1]
-        );
-
-        fullVertexData.push_back(
-            attributes.normals[normsIndex + 2]
-        );
-
-        // U
-        fullVertexData.push_back(
-            attributes.texcoords[uvIndex]
-        );
-
-        // V
-        fullVertexData.push_back(
-            attributes.texcoords[uvIndex + 1]
-        );
-
-        fullVertexData.push_back(
-            tangents[i].x
-        );
-
-        fullVertexData.push_back(
-            tangents[i].y
-        );
-
-        fullVertexData.push_back(
-            tangents[i].z
-        );
-
-        fullVertexData.push_back(
-            bitangents[i].x
-        );
-
-        fullVertexData.push_back(
-            bitangents[i].y
-        );
-
-        fullVertexData.push_back(
-            bitangents[i].z
-        );
-
-    }
+    // try shark
+    Model shark("shark.obj", "3D/textures/shark.png");
+    bool loaded = shark.loadMesh();
+    shark.fillVertexData();
 
     GLfloat vertices[]{
         -0.5f, -0.5f, 0,
@@ -517,15 +239,15 @@ int main(void)
 
     glBindBuffer(GL_ARRAY_BUFFER, VBO);
     glBufferData(GL_ARRAY_BUFFER,
-        sizeof(GL_FLOAT) * fullVertexData.size(),
-        fullVertexData.data(),
+        sizeof(GL_FLOAT) * shark.getVertexData().size(),
+        shark.getVertexData().data(),
         GL_STATIC_DRAW);
 
     glVertexAttribPointer(0,
         3,
         GL_FLOAT,
         GL_FALSE,
-        14 * sizeof(GL_FLOAT),
+        8 * sizeof(GL_FLOAT),
         (void*)0);
 
     // norm ptr
@@ -535,7 +257,7 @@ int main(void)
         3,
         GL_FLOAT,
         GL_FALSE,
-        14 * sizeof(GL_FLOAT),
+        8 * sizeof(GL_FLOAT),
         (void*)normPtr
     );
 
@@ -546,36 +268,13 @@ int main(void)
         2,
         GL_FLOAT,
         GL_FALSE,
-        14 * sizeof(GL_FLOAT),
+        8 * sizeof(GL_FLOAT),
         (void*)uvPtr
-    );
-
-    GLintptr tangentPtr = 8 * sizeof(float);
-    GLintptr bitangentPtr = 11 * sizeof(float);
-
-    glVertexAttribPointer(
-        3,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        14 * sizeof(GL_FLOAT),
-        (void*)tangentPtr
-    );
-
-    glVertexAttribPointer(
-        4,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        14 * sizeof(GL_FLOAT),
-        (void*)bitangentPtr
     );
 
     glEnableVertexAttribArray(0);
     glEnableVertexAttribArray(1);
     glEnableVertexAttribArray(2);
-    glEnableVertexAttribArray(3);
-    glEnableVertexAttribArray(4);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -594,7 +293,7 @@ int main(void)
             glm::vec3(x, y, z));
 
     float scale_x, scale_y, scale_z;
-    scale_x = scale_y = scale_z = 5.f;
+    scale_x = scale_y = scale_z = 2.f;
 
     glm::mat4 scale =
         glm::scale(identity_matrix4,
@@ -602,31 +301,25 @@ int main(void)
 
     float rot_x, rot_y, rot_z;
     rot_x = rot_y = rot_z = 0;
-    rot_x = 1.0f;
-    float theta = -90.f;
+    rot_y = 1.0f;
+
+    float theta = 90.0f;
 
     glm::mat4 rotation =
         glm::rotate(identity_matrix4,
             glm::radians(theta),
             glm::normalize(glm::vec3(rot_x, rot_y, rot_z)));
 
-    // perspective camera
-    glm::mat4 projection = glm::perspective(
-        glm::radians(60.0f),
-        window_height / window_width,
-        0.1f,
-        100.0f
-    );
 
     /* Lighting Variables */
-    glm::vec3 lightPos = glm::vec3(0, 5, 0);
+    glm::vec3 lightPos = glm::vec3(-10, 3, 0);
     glm::vec3 lightColor = glm::vec3(1, 1, 1);
 
-    float ambientStr = 0.2f;
+    float ambientStr = 0.1f;
     glm::vec3 ambientColor = lightColor;
 
-    float specStr = 3.f;
-    float specPhong = 25.0f;
+    float specStr = 0.5f;
+    float specPhong = 16.0f;
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -634,17 +327,11 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-        //glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_DST_COLOR);
-        //glBlendEquation(GL_FUNC_SUBTRACT);
-
         theta += 0.1f;
 
         /* Camera */
         // camera position
-        glm::vec3 cameraPos = glm::vec3(x_cam, 0, 10.f);
+        glm::vec3 cameraPos = glm::vec3(x_cam, y_cam, 10.f);
 
         glm::mat4 cameraPositionMatrix =
             glm::translate(glm::mat4(1.0f),
@@ -694,7 +381,7 @@ int main(void)
         glUniformMatrix4fv(sky_projLoc,
             1,
             GL_FALSE,
-            glm::value_ptr(projection));
+            glm::value_ptr(camera.getProjection()));
 
         unsigned int sky_viewLoc = glGetUniformLocation(skybox_shaderProg, "view");
         glUniformMatrix4fv(sky_viewLoc,
@@ -715,7 +402,7 @@ int main(void)
 
         // translation
         transformation_matrix = glm::translate(transformation_matrix,
-            glm::vec3(x, y, z -5.f));
+            glm::vec3(x, y, z - 5.f));
 
         // scale
         transformation_matrix = glm::scale(transformation_matrix,
@@ -726,15 +413,10 @@ int main(void)
             glm::radians(theta),
             glm::normalize(glm::vec3(rot_x, rot_y, rot_z)));
 
-        glActiveTexture(GL_TEXTURE0);
         GLuint tex0Address = glGetUniformLocation(shaderProg, "tex0");
-        glBindTexture(GL_TEXTURE_2D, texture);
+        glBindTexture(GL_TEXTURE_2D, shark.getTexture());
         glUniform1i(tex0Address, 0);
 
-        glActiveTexture(GL_TEXTURE1);
-        GLuint tex1Address = glGetUniformLocation(shaderProg, "norm_tex");
-        glBindTexture(GL_TEXTURE_2D, norm_tex);
-        glUniform1i(tex1Address, 1);
 
         // diffuse stuff
         unsigned int lightAddress = glGetUniformLocation(shaderProg, "lightPos");
@@ -767,12 +449,12 @@ int main(void)
 
         unsigned int specPhongAddress = glGetUniformLocation(shaderProg, "specPhong");
         glUniform1f(specPhongAddress, specPhong);
-            
+
         unsigned int projLoc = glGetUniformLocation(shaderProg, "projection");
         glUniformMatrix4fv(projLoc,
             1,
             GL_FALSE,
-            glm::value_ptr(projection));
+            glm::value_ptr(camera.getProjection()));
 
         unsigned int viewLoc = glGetUniformLocation(shaderProg, "view");
         glUniformMatrix4fv(viewLoc,
@@ -792,7 +474,7 @@ int main(void)
         //glBindVertexArray(VAO);
 
         glBindVertexArray(VAO);
-        glDrawArrays(GL_TRIANGLES, 0, fullVertexData.size() / 8);
+        glDrawArrays(GL_TRIANGLES, 0, shark.getVertexData().size() / 8);
 
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
