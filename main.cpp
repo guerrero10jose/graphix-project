@@ -13,6 +13,7 @@
 #include "models.h"
 #include "shaders.h"
 #include "camera.h"
+#include "lights.h"
 
 /* Global Variables */
 float window_height = 800.f, window_width = 800.f;
