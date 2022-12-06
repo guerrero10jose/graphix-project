@@ -29,16 +29,22 @@ public:
     std::vector<GLfloat> fullVertexData;
     char const* tex_path;
 
+    // More Stuff
+    GLuint VAO, VBO;
+
     // Texture Stuff
     GLuint texture;
     unsigned char* tex_bytes;
     int img_width, img_height, color_channels;
 
+    // Model Loading
+    glm::mat4 transformation_matrix;
+
     // Constructor
     Model(std::string text, char const* link) {
         path = "3D/objects/" + text;
         tex_path = link;
-
+        
         // set Texture
         setTexture();
     }
@@ -109,8 +115,54 @@ public:
         }
     }
 
-    std::vector<GLfloat> getVertexData() {
-        return fullVertexData;
+    void apply() {
+        glGenVertexArrays(1, &VAO);
+        glGenBuffers(1, &VBO);
+
+        glBindVertexArray(VAO);
+
+        glBindBuffer(GL_ARRAY_BUFFER, VBO);
+        glBufferData(GL_ARRAY_BUFFER,
+            sizeof(GL_FLOAT) * fullVertexData.size(),
+            fullVertexData.data(),
+            GL_STATIC_DRAW);
+
+        glVertexAttribPointer(0,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            8 * sizeof(GL_FLOAT),
+            (void*)0);
+
+        // norm ptr
+        GLintptr normPtr = 3 * sizeof(float);
+        glVertexAttribPointer(
+            1,
+            3,
+            GL_FLOAT,
+            GL_FALSE,
+            8 * sizeof(GL_FLOAT),
+            (void*)normPtr
+        );
+
+        // uv ptr
+        GLintptr uvPtr = 6 * sizeof(float);
+        glVertexAttribPointer(
+            2,
+            2,
+            GL_FLOAT,
+            GL_FALSE,
+            8 * sizeof(GL_FLOAT),
+            (void*)uvPtr
+        );
+
+        glEnableVertexAttribArray(0);
+        glEnableVertexAttribArray(1);
+        glEnableVertexAttribArray(2);
+
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+        glBindVertexArray(0);
+        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
     }
 
     // Texture Functions
@@ -140,7 +192,51 @@ public:
         stbi_image_free(tex_bytes);
     }
 
+    std::vector<GLfloat> getVertexData() {
+        return fullVertexData;
+    }
+
+    GLuint getVAO() {
+        return VAO;
+    }
+
+    GLuint getVBO() {
+        return VBO;
+    }
+
+    const GLuint* getAddVAO() {
+        return &VAO;
+    }
+
+    const GLuint* getAddVBO() {
+        return &VBO;
+    }
+
     GLuint getTexture() {
         return texture;
+    }
+
+    void loadModel(float pos_x, float pos_y, float pos_z,
+        float scale, float rot_x, float rot_y, float rot_z,
+        float theta) {
+
+        transformation_matrix = glm::mat4(1.0f);
+
+        // translation
+        transformation_matrix = glm::translate(transformation_matrix,
+            glm::vec3(pos_x, pos_y, pos_z - 5.f));
+
+        // scale (assume same values)
+        transformation_matrix = glm::scale(transformation_matrix,
+            glm::vec3(scale, scale, scale));
+
+        // rotate
+        transformation_matrix = glm::rotate(transformation_matrix,
+            glm::radians(theta),
+            glm::normalize(glm::vec3(rot_x, rot_y, rot_z)));
+    }
+
+    glm::mat4 getTransMatrix() {
+        return transformation_matrix;
     }
 };

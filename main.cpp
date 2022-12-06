@@ -232,85 +232,20 @@ int main(void)
         0, 1, 2
     };
 
-    GLuint VAO, VBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER,
-        sizeof(GL_FLOAT) * shark.getVertexData().size(),
-        shark.getVertexData().data(),
-        GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        8 * sizeof(GL_FLOAT),
-        (void*)0);
-
-    // norm ptr
-    GLintptr normPtr = 3 * sizeof(float);
-    glVertexAttribPointer(
-        1,
-        3,
-        GL_FLOAT,
-        GL_FALSE,
-        8 * sizeof(GL_FLOAT),
-        (void*)normPtr
-    );
-
-    // uv ptr
-    GLintptr uvPtr = 6 * sizeof(float);
-    glVertexAttribPointer(
-        2,
-        2,
-        GL_FLOAT,
-        GL_FALSE,
-        8 * sizeof(GL_FLOAT),
-        (void*)uvPtr
-    );
-
-    glEnableVertexAttribArray(0);
-    glEnableVertexAttribArray(1);
-    glEnableVertexAttribArray(2);
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-    glBindVertexArray(0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    /* Create Matrix */
-    glm::mat3 identity_matrix3 = glm::mat3(1.0f);
-    glm::mat4 identity_matrix4 = glm::mat4(1.0f);
+    shark.apply();
 
     float x, y, z;
     x = y = z = 0.0f;
     y = -0.5f;
 
-    glm::mat4 translation =
-        glm::translate(identity_matrix4,
-            glm::vec3(x, y, z));
-
     float scale_x, scale_y, scale_z;
     scale_x = scale_y = scale_z = 2.f;
-
-    glm::mat4 scale =
-        glm::scale(identity_matrix4,
-            glm::vec3(scale_x, scale_y, scale_z));
 
     float rot_x, rot_y, rot_z;
     rot_x = rot_y = rot_z = 0;
     rot_y = 1.0f;
 
     float theta = 90.0f;
-
-    glm::mat4 rotation =
-        glm::rotate(identity_matrix4,
-            glm::radians(theta),
-            glm::normalize(glm::vec3(rot_x, rot_y, rot_z)));
-
 
     /* Lighting Variables */
     glm::vec3 lightPos = glm::vec3(-10, 3, 0);
@@ -367,7 +302,6 @@ int main(void)
         cameraOrientation[1][2] = -F.y;
         cameraOrientation[2][2] = -F.z;
 
-        //glm::mat4 viewMatrix = cameraOrientation * cameraPositionMatrix;
         glm::mat4 viewMatrix = glm::lookAt(cameraPos, Center, WorldUp);
 
         // load skybox
@@ -399,6 +333,10 @@ int main(void)
 
         glUseProgram(shaderProg);
 
+        // load object model
+        shark.loadModel(x, y, z, scale_x, rot_x, rot_y, rot_z, theta);
+
+        /*
         glm::mat4 transformation_matrix = glm::mat4(1.0f);
 
         // translation
@@ -413,6 +351,7 @@ int main(void)
         transformation_matrix = glm::rotate(transformation_matrix,
             glm::radians(theta),
             glm::normalize(glm::vec3(rot_x, rot_y, rot_z)));
+        */
 
         GLuint tex0Address = glGetUniformLocation(shaderProg, "tex0");
         glBindTexture(GL_TEXTURE_2D, shark.getTexture());
@@ -467,14 +406,14 @@ int main(void)
         glUniformMatrix4fv(transformLoc,
             1,
             GL_FALSE,
-            glm::value_ptr(transformation_matrix));
+            glm::value_ptr(shark.getTransMatrix()));
 
         /* Apply Shaders */
         glUseProgram(shaderProg);
 
         //glBindVertexArray(VAO);
 
-        glBindVertexArray(VAO);
+        glBindVertexArray(shark.getVAO());
         glDrawArrays(GL_TRIANGLES, 0, shark.getVertexData().size() / 8);
 
         /* Swap front and back buffers */
@@ -484,8 +423,8 @@ int main(void)
         glfwPollEvents();
     }
 
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
+    glDeleteVertexArrays(1, shark.getAddVAO());
+    glDeleteBuffers(1, shark.getAddVBO());
 
     glfwTerminate();
     return 0;
