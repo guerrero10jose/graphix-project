@@ -242,7 +242,7 @@ public:
 
         // translation
         transformation_matrix = glm::translate(transformation_matrix,
-            glm::vec3(pos_x, pos_y, pos_z - 5.f));
+            glm::vec3(pos_x, pos_y, pos_z));
 
         // scale (assume same values)
         transformation_matrix = glm::scale(transformation_matrix,

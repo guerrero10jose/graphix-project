@@ -19,6 +19,10 @@
 float window_height = 800.f, window_width = 800.f;
 float x_mod = 0, x_cam = 0, y_cam = 0;
 
+/* For Player Controls */
+float theta_ship = 180.f;
+float theta_mod  = 0;
+
 // Camera (perspective initial)
 Camera camera(window_width, window_height);
 
@@ -33,12 +37,14 @@ void Key_Callback(GLFWwindow* window,
         action == GLFW_REPEAT) {
         // move bunny to the right
         x_cam -= 1.0f;
+        theta_mod -= 1.0f;
     }
 
     if (key == GLFW_KEY_A &&
         action == GLFW_REPEAT) {
         // move bunny to the right
         x_cam += 1.0f;
+        theta_mod += 1.0f;
     }
 
     if (key == GLFW_KEY_1 &&
@@ -257,7 +263,7 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        theta += 0.1f;
+        //theta += 0.1f;
 
         /* Camera */
         // camera position
@@ -328,7 +334,7 @@ int main(void)
         glUseProgram(shaderProg);
 
         // load object model
-        shark.loadModel(x, y, z, scale_x, rot_x, rot_y, rot_z, theta);
+        shark.loadModel(x, y, z - 10.f, scale_x, rot_x, rot_y, rot_z, theta);
 
         GLuint tex0Address = glGetUniformLocation(shaderProg, "tex0");
         glBindTexture(GL_TEXTURE_2D, shark.getTexture());
@@ -394,7 +400,7 @@ int main(void)
 
         // 2nd obj
         glBindVertexArray(ship.getVAO());
-        ship.loadModel(x + 5.f, y, z, 0.1f, rot_x, rot_y, rot_z, theta);
+        ship.loadModel(0.f, -1.f, 10.f, 0.1f, rot_x, rot_y, rot_z, theta_ship);
 
         tex0Address = glGetUniformLocation(shaderProg, "tex0");
         glBindTexture(GL_TEXTURE_2D, ship.getTexture());
