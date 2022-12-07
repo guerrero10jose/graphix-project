@@ -46,10 +46,10 @@ public:
 		}
 		else {
 			// TODO: Fix This
-			projection = glm::ortho(-5.f,
-				5.f,
-				-5.f,
-				5.f,
+			projection = glm::ortho(-0.5f,
+				0.5f,
+				-0.5f,
+				0.5f,
 				-100.f,
 				100.f);
 

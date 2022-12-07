@@ -18,6 +18,16 @@
 /* Global Variables */
 float window_height = 800.f, window_width = 800.f;
 float x_mod = 0, x_cam = 0, y_cam = 0;
+//camera center for 3rd person view with mouse movement
+glm::vec3 Center = glm::vec3(0, 0.0f, 0);
+
+//mouse state
+float yaw = -90.0f;
+float pitch = 0.0f;
+float fov = 90.0f;
+bool firstMouse = true;
+float lastX = 800.0f / 2.0;
+float lastY = 600.0 / 2.0;
 
 // Camera (perspective initial)
 Camera camera(window_width, window_height);
@@ -41,10 +51,11 @@ void Key_Callback(GLFWwindow* window,
         x_cam += 1.0f;
     }
 
+    /*
     if (key == GLFW_KEY_1 &&
         action == GLFW_PRESS) {
         camera.changePersp();
-    }
+    }*/
 
     if (key == GLFW_KEY_W &&
         action == GLFW_REPEAT) {
@@ -57,6 +68,38 @@ void Key_Callback(GLFWwindow* window,
         // move bunny to the right
         y_cam -= 1.0f;
     }
+}
+
+void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+    if (firstMouse) {
+        lastX = xpos;
+        lastY = ypos;
+        firstMouse = false;
+    }
+
+    float xoffset = xpos - lastX;
+    float yoffset = lastY - ypos; //reversed variables since y-coordinates go from bottom to top
+    lastX = xpos;
+    lastY = ypos;
+
+    float sensitivity = 0.1f; //can change this value to anything, but will affect the sensitivity of the program
+    xoffset *= sensitivity;
+    yoffset *= sensitivity;
+
+    yaw += xoffset;
+    pitch += yoffset;
+
+    //prevents the pitch from going out of bounds (prevents backflipping)
+    if (pitch > 89.0f)
+        pitch = 89.0f;
+    if (pitch < -89.0f)
+        pitch = -89.0f;
+
+    glm::vec3 front;
+    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front.y = sin(glm::radians(pitch));
+    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    Center = glm::normalize(front);
 }
 
 int main(void)
@@ -251,6 +294,11 @@ int main(void)
     float specStr = 0.5f;
     float specPhong = 16.0f;
 
+    //functions gets the current window as well as the void function to get control of the mouse
+    glfwSetCursorPosCallback(window, mouse_callback);
+    //enables cursor movement
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
     {
@@ -269,7 +317,7 @@ int main(void)
 
         // world's up / center
         glm::vec3 WorldUp = glm::vec3(0, 1.0f, 0);
-        glm::vec3 Center = glm::vec3(0, 0.0f, 0);
+        //glm::vec3 Center = glm::vec3(0, 0.0f, 0); //moved to global variable
 
         // forward
         glm::vec3 F = glm::vec3(Center - cameraPos);
@@ -296,7 +344,8 @@ int main(void)
         cameraOrientation[1][2] = -F.y;
         cameraOrientation[2][2] = -F.z;
 
-        glm::mat4 viewMatrix = glm::lookAt(cameraPos, Center, WorldUp);
+        //put center on viewmatrix for third person camera
+        glm::mat4 viewMatrix = glm::lookAt(cameraPos, cameraPos + Center, WorldUp);
 
         // load skybox
         glDepthMask(GL_FALSE);
