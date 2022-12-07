@@ -51,11 +51,11 @@ void Key_Callback(GLFWwindow* window,
         x_cam += 1.0f;
     }
 
-    /*
+    
     if (key == GLFW_KEY_1 &&
         action == GLFW_PRESS) {
         camera.changePersp();
-    }*/
+    }
 
     if (key == GLFW_KEY_W &&
         action == GLFW_REPEAT) {
@@ -294,10 +294,12 @@ int main(void)
     float specStr = 0.5f;
     float specPhong = 16.0f;
 
+    /*
     //functions gets the current window as well as the void function to get control of the mouse
     glfwSetCursorPosCallback(window, mouse_callback);
     //enables cursor movement
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+    */
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -343,9 +345,30 @@ int main(void)
         cameraOrientation[0][2] = -F.x;
         cameraOrientation[1][2] = -F.y;
         cameraOrientation[2][2] = -F.z;
-
+        glm::mat4 viewMatrix = glm::lookAt(cameraPos, cameraPos + Center, WorldUp);
+        switch (camera.currCam) {
+        case 0:         
+            //functions gets the current window as well as the void function to get control of the mouse
+            glfwSetCursorPosCallback(window, mouse_callback);
+            //enables cursor movement
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+            //put center on viewmatrix for third person camera
+            viewMatrix = glm::lookAt(cameraPos, cameraPos + Center, WorldUp);
+            break;
+        case 1:    
+            glfwSetCursorPosCallback(window, GL_FALSE);
+            //enables cursor movement
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+            viewMatrix = glm::lookAt(cameraPos, cameraPos + Center, WorldUp);
+        }
+        /*
+        //functions gets the current window as well as the void function to get control of the mouse
+        glfwSetCursorPosCallback(window, mouse_callback);
+        //enables cursor movement
+        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
         //put center on viewmatrix for third person camera
         glm::mat4 viewMatrix = glm::lookAt(cameraPos, cameraPos + Center, WorldUp);
+        */
 
         // load skybox
         glDepthMask(GL_FALSE);
