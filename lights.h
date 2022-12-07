@@ -15,14 +15,19 @@ public:
 	glm::vec3 direction;
 	glm::vec3 ambient;
 	glm::vec3 specular;
-
-	Light() {
-
-	}
 };
 
 class DirLight : public Light {
+public:
+	glm::vec3 direction;
 
+	void assignlightDir(glm::vec3 newDir) {
+		direction = newDir;
+	}
+
+	glm::vec3 getlightDir() {
+		return direction;
+	}
 };
 
 class PointLight : public Light {
