@@ -46,7 +46,7 @@ public:
         tex_path = link;
         
         // set Texture
-        setTexture();
+        //setTexture();
     }
 
     // Model Functions
@@ -192,6 +192,32 @@ public:
         stbi_image_free(tex_bytes);
     }
 
+    void setTexture2() {
+        stbi_set_flip_vertically_on_load(true);
+
+        tex_bytes = stbi_load(tex_path,
+            &img_width,
+            &img_height,
+            &color_channels, 0);
+
+        glGenTextures(1, &texture);
+        glActiveTexture(GL_TEXTURE);
+        glBindTexture(GL_TEXTURE_2D, texture);
+
+        glTexImage2D(GL_TEXTURE_2D,
+            0,
+            GL_RGB,
+            img_width,
+            img_height,
+            0,
+            GL_RGB,
+            GL_UNSIGNED_BYTE,
+            tex_bytes);
+
+        glGenerateMipmap(GL_TEXTURE_2D);
+        stbi_image_free(tex_bytes);
+    }
+
     std::vector<GLfloat> getVertexData() {
         return fullVertexData;
     }
@@ -202,14 +228,6 @@ public:
 
     GLuint getVBO() {
         return VBO;
-    }
-
-    const GLuint* getAddVAO() {
-        return &VAO;
-    }
-
-    const GLuint* getAddVBO() {
-        return &VBO;
     }
 
     GLuint getTexture() {
@@ -238,5 +256,10 @@ public:
 
     glm::mat4 getTransMatrix() {
         return transformation_matrix;
+    }
+
+    void clear() {
+        glDeleteVertexArrays(1, &VAO);
+        glDeleteBuffers(1, &VBO);
     }
 };

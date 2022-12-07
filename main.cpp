@@ -82,12 +82,10 @@ int main(void)
 
     // depth testing
     glEnable(GL_DEPTH_TEST);
-    glViewport(0, 0, window_width, window_height);
-    glEnable(GL_SCISSOR_TEST);
 
     /* Screen Space */
     // Should be same size as window
-    // glViewport(0, 0, window_width, window_height);
+    glViewport(0, 0, window_width, window_height);
 
     /* Set Callback function */
     glfwSetKeyCallback(window, Key_Callback);
@@ -220,26 +218,22 @@ int main(void)
     // try shark
     Model shark("shark.obj", "3D/textures/shark.png");
     bool loaded = shark.loadMesh();
+    shark.setTexture();
     shark.fillVertexData();
-
-    GLfloat vertices[]{
-        -0.5f, -0.5f, 0,
-        0, 0.5f, 0,
-        0.5, -0.5f, 0
-    };
-
-    GLuint indices[]{
-        0, 1, 2
-    };
-
     shark.apply();
+
+    Model ship("Microsub.obj", "3D/textures/MicroSub_Albedo.png");
+    loaded = ship.loadMesh();
+    ship.setTexture2();
+    ship.fillVertexData();
+    ship.apply();
 
     float x, y, z;
     x = y = z = 0.0f;
-    y = -0.5f;
+    y = -0.25f;
 
     float scale_x, scale_y, scale_z;
-    scale_x = scale_y = scale_z = 2.f;
+    scale_x = scale_y = scale_z = 1.f;
 
     float rot_x, rot_y, rot_z;
     rot_x = rot_y = rot_z = 0;
@@ -336,27 +330,9 @@ int main(void)
         // load object model
         shark.loadModel(x, y, z, scale_x, rot_x, rot_y, rot_z, theta);
 
-        /*
-        glm::mat4 transformation_matrix = glm::mat4(1.0f);
-
-        // translation
-        transformation_matrix = glm::translate(transformation_matrix,
-            glm::vec3(x, y, z - 5.f));
-
-        // scale
-        transformation_matrix = glm::scale(transformation_matrix,
-            glm::vec3(scale_x, scale_y, scale_z));
-
-        // rotate
-        transformation_matrix = glm::rotate(transformation_matrix,
-            glm::radians(theta),
-            glm::normalize(glm::vec3(rot_x, rot_y, rot_z)));
-        */
-
         GLuint tex0Address = glGetUniformLocation(shaderProg, "tex0");
         glBindTexture(GL_TEXTURE_2D, shark.getTexture());
         glUniform1i(tex0Address, 0);
-
 
         // diffuse stuff
         unsigned int lightAddress = glGetUniformLocation(shaderProg, "lightPos");
@@ -416,6 +392,66 @@ int main(void)
         glBindVertexArray(shark.getVAO());
         glDrawArrays(GL_TRIANGLES, 0, shark.getVertexData().size() / 8);
 
+        // 2nd obj
+        glBindVertexArray(ship.getVAO());
+        ship.loadModel(x + 5.f, y, z, 0.1f, rot_x, rot_y, rot_z, theta);
+
+        tex0Address = glGetUniformLocation(shaderProg, "tex0");
+        glBindTexture(GL_TEXTURE_2D, ship.getTexture());
+        glUniform1i(tex0Address, 0);
+
+        // diffuse stuff
+        lightAddress = glGetUniformLocation(shaderProg, "lightPos");
+        glUniform3fv(lightAddress,
+            1,
+            glm::value_ptr(lightPos));
+
+        lightColorAddress = glGetUniformLocation(shaderProg, "lightColor");
+        glUniform3fv(lightColorAddress,
+            1,
+            glm::value_ptr(lightColor));
+
+        // ambient stuff
+        ambientStrAddress = glGetUniformLocation(shaderProg, "ambientStr");
+        glUniform1f(ambientStrAddress, ambientStr);
+
+        ambientColorAddress = glGetUniformLocation(shaderProg, "ambientColor");
+        glUniform3fv(ambientColorAddress,
+            1,
+            glm::value_ptr(ambientColor));
+
+        // specphong stuff
+        cameraPosAddress = glGetUniformLocation(shaderProg, "cameraPos");
+        glUniform3fv(cameraPosAddress,
+            1,
+            glm::value_ptr(cameraPos));
+
+        specStrAddress = glGetUniformLocation(shaderProg, "specStr");
+        glUniform1f(specStrAddress, specStr);
+
+        specPhongAddress = glGetUniformLocation(shaderProg, "specPhong");
+        glUniform1f(specPhongAddress, specPhong);
+
+        projLoc = glGetUniformLocation(shaderProg, "projection");
+        glUniformMatrix4fv(projLoc,
+            1,
+            GL_FALSE,
+            glm::value_ptr(camera.getProjection()));
+
+        viewLoc = glGetUniformLocation(shaderProg, "view");
+        glUniformMatrix4fv(viewLoc,
+            1,
+            GL_FALSE,
+            glm::value_ptr(viewMatrix));
+
+        transformLoc = glGetUniformLocation(shaderProg, "transform");
+        glUniformMatrix4fv(transformLoc,
+            1,
+            GL_FALSE,
+            glm::value_ptr(ship.getTransMatrix()));
+
+        glDrawArrays(GL_TRIANGLES, 0, ship.getVertexData().size() / 8);
+
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
 
@@ -423,8 +459,8 @@ int main(void)
         glfwPollEvents();
     }
 
-    glDeleteVertexArrays(1, shark.getAddVAO());
-    glDeleteBuffers(1, shark.getAddVBO());
+    shark.clear();
+    ship.clear();
 
     glfwTerminate();
     return 0;
