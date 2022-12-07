@@ -33,6 +33,10 @@ public:
 		currCam = 0;
 	}
 
+	int getCurrentCam() {
+		return currCam;
+	}
+
 	void changePersp() {
 		if (currCam) {
 			projection = glm::perspective(
@@ -51,7 +55,8 @@ public:
 				-0.5f,
 				0.5f,
 				-100.f,
-				100.f);
+				100.f
+			);
 
 			currCam = 1;
 		}
