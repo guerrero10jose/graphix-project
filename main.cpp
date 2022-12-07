@@ -31,7 +31,7 @@ float lastY = 600.0 / 2.0;
 
 /* For Player Controls */
 float theta_ship = 180.f;
-float theta_mod  = 0;
+float theta_mod  = 180.f;
 
 // Camera (perspective initial)
 Camera camera(window_width, window_height);
@@ -73,6 +73,12 @@ void Key_Callback(GLFWwindow* window,
         action == GLFW_REPEAT) {
         // move bunny to the right
         y_cam -= 1.0f;
+    }
+
+    if (key == GLFW_KEY_E &&
+        action == GLFW_PRESS) {
+        // move bunny to the right
+        theta_mod += 3.0f;
     }
 }
 
@@ -312,6 +318,7 @@ int main(void)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         //theta += 0.1f;
+        theta_ship = theta_mod;
 
         /* Camera */
         // camera position
@@ -351,7 +358,9 @@ int main(void)
         cameraOrientation[2][2] = -F.z;
 
         //put center on viewmatrix for third person camera
+        // glm::mat4 viewMatrix = glm::lookAt(cameraPos, cameraPos + Center, WorldUp);
         glm::mat4 viewMatrix = glm::lookAt(cameraPos, cameraPos + Center, WorldUp);
+        //glm::mat4 viewMatrix = glm::lookAt(cameraPos, Center, WorldUp);
 
         // load skybox
         glDepthMask(GL_FALSE);
