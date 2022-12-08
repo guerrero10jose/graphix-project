@@ -168,9 +168,14 @@ public:
 		case 'e':
 			cameraPos -= glm::normalize(glm::cross(R, currCenter)) * camSpeed;
 			break;
+		// rotate left / right
+		case 'a':
+			cameraPos.x += camSpeed;
+			cameraPos.y += camSpeed;
+			break;
+
 		}
 		
 	}
-
 
 };

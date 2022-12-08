@@ -17,7 +17,7 @@
 
 /* Global Variables */
 float window_height = 800.f, window_width = 800.f;
-float x_mod = 0, mov_forback = 0, mov_updown = 0, y_cam = 0;
+float x_mod = 0, mov_forback = 0, mov_updown = 0, rot_leftright = 0;
 //camera center for 3rd person view with mouse movement
 glm::vec3 Center = glm::vec3(0, 0.0f, 0);
 
@@ -80,20 +80,16 @@ void Key_Callback(GLFWwindow* window,
 
     if (key == GLFW_KEY_A &&
         action == GLFW_REPEAT) {
-        // move bunny to the right
-        //x_cam += 1.0f;
-        //theta_mod += 1.0f;
+        //rot_leftright -= cameraSpeed;
         camera.updateCameraPos(cameraSpeed, 'a');
     }
 
-    // when user presses D
     if (key == GLFW_KEY_D &&
         action == GLFW_REPEAT) {
         // move bunny to the right
         //x_cam -= 1.0f;
         //theta_mod -= 1.0f;
     }
-
     
     if (key == GLFW_KEY_1 &&
         action == GLFW_PRESS) {
