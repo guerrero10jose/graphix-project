@@ -17,7 +17,7 @@
 
 /* Global Variables */
 float window_height = 800.f, window_width = 800.f;
-float x_mod = 0, mov_forback = 0, y_cam = 0;
+float x_mod = 0, mov_forback = 0, mov_updown = 0, y_cam = 0;
 //camera center for 3rd person view with mouse movement
 glm::vec3 Center = glm::vec3(0, 0.0f, 0);
 
@@ -77,19 +77,21 @@ void Key_Callback(GLFWwindow* window,
     int action,
     int mods)
 {
-    // when user presses D
-    if (key == GLFW_KEY_D &&
-        action == GLFW_REPEAT) {
-        // move bunny to the right
-        //x_cam -= 1.0f;
-        theta_mod -= 1.0f;
-    }
 
     if (key == GLFW_KEY_A &&
         action == GLFW_REPEAT) {
         // move bunny to the right
         //x_cam += 1.0f;
-        theta_mod += 1.0f;
+        //theta_mod += 1.0f;
+        camera.updateCameraPos(cameraSpeed, 'a');
+    }
+
+    // when user presses D
+    if (key == GLFW_KEY_D &&
+        action == GLFW_REPEAT) {
+        // move bunny to the right
+        //x_cam -= 1.0f;
+        //theta_mod -= 1.0f;
     }
 
     
@@ -113,10 +115,16 @@ void Key_Callback(GLFWwindow* window,
         mov_forback += cameraSpeed;
     }
 
+    if (key == GLFW_KEY_Q &&
+        action == GLFW_REPEAT) {
+        camera.updateCameraPos(cameraSpeed, 'q');
+        mov_updown += cameraSpeed;
+    }
+
     if (key == GLFW_KEY_E &&
-        action == GLFW_PRESS) {
-        // move bunny to the right
-        theta_mod += 3.0f;
+        action == GLFW_REPEAT) {
+        camera.updateCameraPos(cameraSpeed, 'e');
+        mov_updown -= cameraSpeed;
     }
 }
 
@@ -439,7 +447,7 @@ int main(void)
 
         // 2nd obj
         glBindVertexArray(ship.getVAO());
-        ship.loadModel(0.f, -1.f, 10.f + mov_forback, 0.1f, rot_x, rot_y, rot_z, theta_ship);
+        ship.loadModel(0.f, -1.f + mov_updown, 10.f + mov_forback, 0.1f, rot_x, rot_y, rot_z, theta_ship);
 
         tex0Address = glGetUniformLocation(shaderProg, "tex0");
         glBindTexture(GL_TEXTURE_2D, ship.getTexture());

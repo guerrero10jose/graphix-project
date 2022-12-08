@@ -154,11 +154,19 @@ public:
 	void updateCameraPos(float camSpeed, char c) {
 
 		switch (c) {
+		// forward / backward
 		case 'f': 
 			cameraPos += camSpeed * currCenter;
 			break;
 		case 'b' :
 			cameraPos -= camSpeed * currCenter;
+			break;
+		// ascend / descend
+		case 'q':
+			cameraPos += glm::normalize(glm::cross(R, currCenter)) * camSpeed;
+			break;
+		case 'e':
+			cameraPos -= glm::normalize(glm::cross(R, currCenter)) * camSpeed;
 			break;
 		}
 		
