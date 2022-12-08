@@ -17,72 +17,28 @@
 
 /* Global Variables */
 float window_height = 800.f, window_width = 800.f;
-float x_mod = 0, x_cam = 0, y_cam = 0;
+float x_mod = 0, mov_forback = 0, y_cam = 0;
 //camera center for 3rd person view with mouse movement
 glm::vec3 Center = glm::vec3(0, 0.0f, 0);
+
+/* For Player Controls */
+float theta_ship = 180.f;
+float theta_mod  = 180.f;
 
 //mouse state
 float yaw = -90.0f;
 float pitch = 0.0f;
 float fov = 90.0f;
 bool firstMouse = true;
-float lastX = 800.0f / 2.0;
-float lastY = 600.0 / 2.0;
-
-/* For Player Controls */
-float theta_ship = 180.f;
-float theta_mod  = 180.f;
+float lastX = window_width / 2.0;
+float lastY = window_height / 2.0;
 
 // Camera (perspective initial)
-Camera camera(window_width, window_height);
-
-void Key_Callback(GLFWwindow* window,
-    int key,
-    int scancode,
-    int action,
-    int mods)
-{
-    // when user presses D
-    if (key == GLFW_KEY_D &&
-        action == GLFW_REPEAT) {
-        // move bunny to the right
-        x_cam -= 1.0f;
-        theta_mod -= 1.0f;
-    }
-
-    if (key == GLFW_KEY_A &&
-        action == GLFW_REPEAT) {
-        // move bunny to the right
-        x_cam += 1.0f;
-        theta_mod += 1.0f;
-    }
-
-    
-    if (key == GLFW_KEY_1 &&
-        action == GLFW_PRESS) {
-        camera.changePersp();
-    }
-
-    if (key == GLFW_KEY_W &&
-        action == GLFW_REPEAT) {
-        // move bunny to the right
-        y_cam += 1.0f;
-    }
-
-    if (key == GLFW_KEY_S &&
-        action == GLFW_REPEAT) {
-        // move bunny to the right
-        y_cam -= 1.0f;
-    }
-
-    if (key == GLFW_KEY_E &&
-        action == GLFW_PRESS) {
-        // move bunny to the right
-        theta_mod += 3.0f;
-    }
-}
+Camera camera(window_width, window_height, 0, 0, 10.f);
+float cameraSpeed = 1.f;
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
+
     if (firstMouse) {
         lastX = xpos;
         lastY = ypos;
@@ -108,10 +64,60 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
         pitch = -89.0f;
 
     glm::vec3 front;
+
     front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
     front.y = sin(glm::radians(pitch));
     front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
     Center = glm::normalize(front);
+}
+
+void Key_Callback(GLFWwindow* window,
+    int key,
+    int scancode,
+    int action,
+    int mods)
+{
+    // when user presses D
+    if (key == GLFW_KEY_D &&
+        action == GLFW_REPEAT) {
+        // move bunny to the right
+        //x_cam -= 1.0f;
+        theta_mod -= 1.0f;
+    }
+
+    if (key == GLFW_KEY_A &&
+        action == GLFW_REPEAT) {
+        // move bunny to the right
+        //x_cam += 1.0f;
+        theta_mod += 1.0f;
+    }
+
+    
+    if (key == GLFW_KEY_1 &&
+        action == GLFW_PRESS) {
+        // Change to third person moveable
+        camera.changePersp(); 
+    }
+
+    // forward
+    if (key == GLFW_KEY_W &&
+        action == GLFW_REPEAT) {
+        camera.updateCameraPos(cameraSpeed, 'f');
+        mov_forback -= cameraSpeed;
+    }
+
+    // backward
+    if (key == GLFW_KEY_S &&
+        action == GLFW_REPEAT) {
+        camera.updateCameraPos(cameraSpeed, 'b');
+        mov_forback += cameraSpeed;
+    }
+
+    if (key == GLFW_KEY_E &&
+        action == GLFW_PRESS) {
+        // move bunny to the right
+        theta_mod += 3.0f;
+    }
 }
 
 int main(void)
@@ -129,6 +135,7 @@ int main(void)
         glfwTerminate();
         return -1;
     }
+
 
     /* Make the window's context current */
     glfwMakeContextCurrent(window);
@@ -323,66 +330,18 @@ int main(void)
         theta_ship = theta_mod;
 
         /* Camera */
-        // camera position
-        glm::vec3 cameraPos = glm::vec3(x_cam, y_cam, 10.f);
-
-        glm::mat4 cameraPositionMatrix =
-            glm::translate(glm::mat4(1.0f),
-                cameraPos * -1.0f);
-
-        // world's up / center
-        glm::vec3 WorldUp = glm::vec3(0, 1.0f, 0);
-        //glm::vec3 Center = glm::vec3(0, 0.0f, 0); //moved to global variable
-
-        // forward
-        glm::vec3 F = glm::vec3(Center - cameraPos);
-        F = glm::normalize(F);
-
-        // right
-        glm::vec3 R = glm::cross(F, WorldUp);
-
-        // up
-        glm::vec3 U = glm::cross(R, F);
-
-        // orientation matrix
-        glm::mat4 cameraOrientation = glm::mat4(1.0f);
-
-        cameraOrientation[0][0] = R.x;
-        cameraOrientation[1][0] = R.y;
-        cameraOrientation[2][0] = R.z;
-
-        cameraOrientation[0][1] = U.x;
-        cameraOrientation[1][1] = U.y;
-        cameraOrientation[2][1] = U.z;
-
-        cameraOrientation[0][2] = -F.x;
-        cameraOrientation[1][2] = -F.y;
-        cameraOrientation[2][2] = -F.z;
-        glm::mat4 viewMatrix = glm::lookAt(cameraPos, cameraPos + Center, WorldUp);
-        switch (camera.currCam) {
-        case 0:         
-            //functions gets the current window as well as the void function to get control of the mouse
-            glfwSetCursorPosCallback(window, mouse_callback);
-            //enables cursor movement
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-            //put center on viewmatrix for third person camera
-            viewMatrix = glm::lookAt(cameraPos, cameraPos + Center, WorldUp);
+        switch (camera.getCurrentCam()) {
+        case 0: 
+            glfwSetCursorPosCallback(window, GL_FALSE); 
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL); 
             break;
-        case 1:    
-            glfwSetCursorPosCallback(window, GL_FALSE);
-            //enables cursor movement
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            viewMatrix = glm::lookAt(cameraPos, cameraPos + Center, WorldUp);
+        case 1: 
+            glfwSetCursorPosCallback(window, mouse_callback); 
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
+            break;
         }
-        /*
-        //functions gets the current window as well as the void function to get control of the mouse
-        glfwSetCursorPosCallback(window, mouse_callback);
-        //enables cursor movement
-        glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-        //put center on viewmatrix for third person camera
-        // glm::mat4 viewMatrix = glm::lookAt(cameraPos, cameraPos + Center, WorldUp);
-        glm::mat4 viewMatrix = glm::lookAt(cameraPos, cameraPos + Center, WorldUp);
-        */
+
+        camera.project(Center);
 
         // load skybox
         glDepthMask(GL_FALSE);
@@ -390,7 +349,7 @@ int main(void)
         glUseProgram(skybox_shaderProg);
 
         glm::mat4 sky_view = glm::mat4(1.f);
-        sky_view = glm::mat4(glm::mat3(viewMatrix));
+        sky_view = glm::mat4(glm::mat3(camera.getViewMatrix()));
 
         unsigned int sky_projLoc = glGetUniformLocation(skybox_shaderProg, "projection");
         glUniformMatrix4fv(sky_projLoc,
@@ -444,7 +403,7 @@ int main(void)
         unsigned int cameraPosAddress = glGetUniformLocation(shaderProg, "cameraPos");
         glUniform3fv(cameraPosAddress,
             1,
-            glm::value_ptr(cameraPos));
+            glm::value_ptr(camera.getCameraPos()));
 
         unsigned int specStrAddress = glGetUniformLocation(shaderProg, "specStr");
         glUniform1f(specStrAddress, specStr);
@@ -462,7 +421,7 @@ int main(void)
         glUniformMatrix4fv(viewLoc,
             1,
             GL_FALSE,
-            glm::value_ptr(viewMatrix));
+            glm::value_ptr(camera.getViewMatrix()));
 
         unsigned int transformLoc = glGetUniformLocation(shaderProg, "transform");
         glUniformMatrix4fv(transformLoc,
@@ -480,7 +439,7 @@ int main(void)
 
         // 2nd obj
         glBindVertexArray(ship.getVAO());
-        ship.loadModel(0.f, -1.f, 10.f, 0.1f, rot_x, rot_y, rot_z, theta_ship);
+        ship.loadModel(0.f, -1.f, 10.f + mov_forback, 0.1f, rot_x, rot_y, rot_z, theta_ship);
 
         tex0Address = glGetUniformLocation(shaderProg, "tex0");
         glBindTexture(GL_TEXTURE_2D, ship.getTexture());
@@ -510,7 +469,7 @@ int main(void)
         cameraPosAddress = glGetUniformLocation(shaderProg, "cameraPos");
         glUniform3fv(cameraPosAddress,
             1,
-            glm::value_ptr(cameraPos));
+            glm::value_ptr(camera.getCameraPos()));
 
         specStrAddress = glGetUniformLocation(shaderProg, "specStr");
         glUniform1f(specStrAddress, specStr);
@@ -528,7 +487,7 @@ int main(void)
         glUniformMatrix4fv(viewLoc,
             1,
             GL_FALSE,
-            glm::value_ptr(viewMatrix));
+            glm::value_ptr(camera.getViewMatrix()));
 
         transformLoc = glGetUniformLocation(shaderProg, "transform");
         glUniformMatrix4fv(transformLoc,
