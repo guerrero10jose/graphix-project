@@ -627,8 +627,9 @@ int main(void)
         *
         */
         
+        //top right
         glBindVertexArray(jfish.getVAO());
-        jfish.loadModel(4.0f, y, z - 10.f, scale_x, rot_x, rot_y, rot_z, theta);
+        jfish.loadModel(50.0f, 25.0f, z - 10.f, scale_x, rot_x, rot_y, rot_z, theta);
 
         tex0Address = glGetUniformLocation(currShader, "tex0");
         glBindTexture(GL_TEXTURE_2D, jfish.getTexture());
@@ -696,8 +697,9 @@ int main(void)
         *
         */
 
+        //leftmost
         glBindVertexArray(trident.getVAO());
-        trident.loadModel(-2.0f, y, z - 10.f, scale_x, rot_x, rot_y, rot_z, theta);
+        trident.loadModel(-75.0f, -5.0f, -25.0f - 10.f, scale_x, rot_x, rot_y, rot_z, theta);
 
         tex0Address = glGetUniformLocation(currShader, "tex0");
         glBindTexture(GL_TEXTURE_2D, trident.getTexture());
