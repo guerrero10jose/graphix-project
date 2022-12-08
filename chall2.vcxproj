@@ -174,6 +174,7 @@
   <ItemGroup>
     <None Include="Shaders\skybox.frag" />
     <None Include="Shaders\skybox.vert" />
+    <None Include="Shaders\sonar.frag" />
   </ItemGroup>
   <ItemGroup>
     <Image Include="3D\textures\shark.png" />
