@@ -24,6 +24,7 @@ glm::vec3 Center = glm::vec3(0, 0.0f, 0);
 /* For Player Controls */
 float theta_ship = 180.f;
 float theta_mod  = 180.f;
+int light_setting = 0;
 
 //mouse state
 float yaw = -90.0f;
@@ -125,6 +126,10 @@ void Key_Callback(GLFWwindow* window,
         action == GLFW_REPEAT) {
         camera.updateCameraPos(cameraSpeed, 'e');
         mov_updown -= cameraSpeed;
+    }
+    if (key == GLFW_KEY_F && action == GLFW_PRESS) {
+        light_setting++;
+        light_setting = light_setting % 3;
     }
 }
 
@@ -312,14 +317,16 @@ int main(void)
     float theta = 90.0f;
 
     /* Lighting Variables */
-    glm::vec3 lightPos = glm::vec3(-10, 3, 0);
+    glm::vec3 lightPos = camera.getCameraPos();
     glm::vec3 lightColor = glm::vec3(1, 1, 1);
+    glm::vec3 lightPos2 = glm::vec3(0, 10, 0);
+    glm::vec3 lightColor2 = glm::vec3(0, 0, 1);
 
-    float ambientStr = 0.1f;
+    float ambientStr = 0.001f;
     glm::vec3 ambientColor = lightColor;
 
-    float specStr = 0.5f;
-    float specPhong = 16.0f;
+    float specStr = 0.2f;
+    float specPhong = 8.0f;
 
     /*
     //functions gets the current window as well as the void function to get control of the mouse
@@ -334,6 +341,21 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        lightPos = camera.getCameraPos();
+        switch (light_setting) {
+            case 0: specStr = 0.2f;
+                    specPhong = 3.0f;
+                    break;
+            case 1: specStr = 0.4f;
+                    specPhong = 6.0f;
+                    break;
+            case 2: specStr = 0.8f;
+                    specPhong = 9.0f;
+                    break;
+            default:
+                specStr = 1.0f;
+                specPhong = 3.0f;
+        }
         //theta += 0.1f;
         theta_ship = theta_mod;
 
@@ -386,18 +408,23 @@ int main(void)
         GLuint tex0Address = glGetUniformLocation(shaderProg, "tex0");
         glBindTexture(GL_TEXTURE_2D, shark.getTexture());
         glUniform1i(tex0Address, 0);
-
         // diffuse stuff
         unsigned int lightAddress = glGetUniformLocation(shaderProg, "lightPos");
         glUniform3fv(lightAddress,
             1,
             glm::value_ptr(lightPos));
-
         unsigned int lightColorAddress = glGetUniformLocation(shaderProg, "lightColor");
         glUniform3fv(lightColorAddress,
             1,
             glm::value_ptr(lightColor));
-
+        unsigned int lightAddress2 = glGetUniformLocation(shaderProg, "lightPos2");
+        glUniform3fv(lightAddress2,
+            1,
+            glm::value_ptr(lightPos2));
+        unsigned int lightColorAddress2 = glGetUniformLocation(shaderProg, "lightColor2");
+        glUniform3fv(lightColorAddress2,
+            1,
+            glm::value_ptr(lightColor2));
         // ambient stuff
         unsigned int ambientStrAddress = glGetUniformLocation(shaderProg, "ambientStr");
         glUniform1f(ambientStrAddress, ambientStr);
