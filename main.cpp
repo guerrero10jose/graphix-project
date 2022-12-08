@@ -17,13 +17,13 @@
 
 /* Global Variables */
 float window_height = 800.f, window_width = 800.f;
-float x_mod = 0, mov_forback = 0, mov_updown = 0, y_cam = 0;
+float x_mod = 0, mov_forback = 0, mov_updown = 0, rot_leftright = 0;
 //camera center for 3rd person view with mouse movement
 glm::vec3 Center = glm::vec3(0, 0.0f, 0);
 
 /* For Player Controls */
 float theta_ship = 180.f;
-float theta_mod  = 180.f;
+float theta_mod = 180.f;
 
 //mouse state
 float yaw = -90.0f;
@@ -80,13 +80,10 @@ void Key_Callback(GLFWwindow* window,
 
     if (key == GLFW_KEY_A &&
         action == GLFW_REPEAT) {
-        // move bunny to the right
-        //x_cam += 1.0f;
-        //theta_mod += 1.0f;
+        //rot_leftright -= cameraSpeed;
         camera.updateCameraPos(cameraSpeed, 'a');
     }
 
-    // when user presses D
     if (key == GLFW_KEY_D &&
         action == GLFW_REPEAT) {
         // move bunny to the right
@@ -94,11 +91,10 @@ void Key_Callback(GLFWwindow* window,
         //theta_mod -= 1.0f;
     }
 
-    
     if (key == GLFW_KEY_1 &&
         action == GLFW_PRESS) {
         // Change to third person moveable
-        camera.changePersp(); 
+        camera.changePersp();
     }
 
     // forward
@@ -350,14 +346,14 @@ int main(void)
 
         /* Camera */
         switch (camera.getCurrentCam()) {
-        case 0: 
-            glfwSetCursorPosCallback(window, GL_FALSE); 
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL); 
+        case 0:
+            glfwSetCursorPosCallback(window, GL_FALSE);
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
             currShader = sonar_shaderProg;
             break;
-        case 1: 
-            glfwSetCursorPosCallback(window, mouse_callback); 
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED); 
+        case 1:
+            glfwSetCursorPosCallback(window, mouse_callback);
+            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
             currShader = shaderProg;
             break;
         }
