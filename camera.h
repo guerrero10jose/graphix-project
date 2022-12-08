@@ -96,10 +96,10 @@ public:
 		WorldUp = glm::vec3(0, 1.0f, 0);
 
 		switch (currCam) {
-		case 0: 
+		case 0:
 			currCenter = glm::vec3(0, 0.0f, -1.0f);
 			break;
-		case 1: 
+		case 1:
 			currCenter = cent;
 			break;
 		}
@@ -130,10 +130,10 @@ public:
 		cameraOrientation[2][2] = -F.z;
 
 		switch (currCam) {
-		case 0: 
+		case 0:
 			viewMatrix = glm::lookAt(cameraPos, cameraPos + currCenter, WorldUp);
 			break;
-		case 1: 
+		case 1:
 			viewMatrix = glm::lookAt(cameraPos, cameraPos + currCenter, WorldUp);
 			break;
 		}
@@ -154,23 +154,28 @@ public:
 	void updateCameraPos(float camSpeed, char c) {
 
 		switch (c) {
-		// forward / backward
-		case 'f': 
+			// forward / backward
+		case 'f':
 			cameraPos += camSpeed * currCenter;
 			break;
-		case 'b' :
+		case 'b':
 			cameraPos -= camSpeed * currCenter;
 			break;
-		// ascend / descend
+			// ascend / descend
 		case 'q':
 			cameraPos += glm::normalize(glm::cross(R, currCenter)) * camSpeed;
 			break;
 		case 'e':
 			cameraPos -= glm::normalize(glm::cross(R, currCenter)) * camSpeed;
 			break;
-		}
-		
-	}
+			// rotate left / right
+		case 'a':
+			cameraPos.x += camSpeed;
+			cameraPos.y += camSpeed;
+			break;
 
+		}
+
+	}
 
 };
