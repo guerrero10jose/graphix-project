@@ -420,7 +420,7 @@ int main(void)
         case 0:
             glfwSetCursorPosCallback(window, GL_FALSE);
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            currShader = shaderProg;
+            currShader = sonar_shaderProg;
             break;
         case 1:
             glfwSetCursorPosCallback(window, mouse_callback);
