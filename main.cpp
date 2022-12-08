@@ -64,6 +64,11 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     if (pitch < -89.0f)
         pitch = -89.0f;
 
+    if (yaw > -60.0f)
+        yaw = -60.0f;
+    if (yaw < -120.0f)
+        yaw = -120.0f;
+
     glm::vec3 front;
 
     front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
@@ -81,15 +86,33 @@ void Key_Callback(GLFWwindow* window,
 
     if (key == GLFW_KEY_A &&
         action == GLFW_REPEAT) {
-        //rot_leftright -= cameraSpeed;
-        //camera.updateCameraPos(cameraSpeed, 'a');
+
+        switch (camera.getCurrentCam()) {
+        case 0:
+            rot_leftright -= cameraSpeed;
+            Center = camera.rotateCamera(cameraSpeed, rot_leftright);
+            theta_ship += cameraSpeed;
+            break;
+        case 1:
+            theta_ship -= cameraSpeed;
+            break;
+        }
+        
     }
 
     if (key == GLFW_KEY_D &&
         action == GLFW_REPEAT) {
-        // move bunny to the right
-        //x_cam -= 1.0f;
-        //theta_mod -= 1.0f;
+
+        switch (camera.getCurrentCam()) {
+        case 0:
+            rot_leftright += cameraSpeed;
+            Center = camera.rotateCamera(cameraSpeed, rot_leftright);
+            theta_ship -= cameraSpeed;
+            break;
+        case 1:
+            theta_ship += cameraSpeed;
+            break;
+        }
     }
     
     if (key == GLFW_KEY_1 &&
@@ -389,7 +412,8 @@ int main(void)
                 specPhong = 3.0f;
         }
         //theta += 0.1f;
-        theta_ship = theta_mod;
+        //theta_ship = theta_mod;
+        //theta_ship += 0.1f;
 
         /* Camera */
         switch (camera.getCurrentCam()) {
@@ -524,7 +548,8 @@ int main(void)
         */
         switch (camera.getCurrentCam()) {
         case 0:
-            ship.loadModel(0.f, -1.f + mov_updown, 10.f + mov_forback, 0.1f, rot_x, rot_y, rot_z, theta_ship);
+            //ship.loadModel(0.f, -1.f + mov_updown, 10.f + mov_forback, 0.1f, rot_x, rot_y, rot_z, theta_ship);
+            ship.loadModel(camera.getCameraPos(), 0.1f, rot_x, rot_y, rot_z, theta_ship);
             break;
         case 1:
             ship.loadModel(camera.getCameraPos2(), 0.1f, rot_x, rot_y, rot_z, theta_ship, Center);

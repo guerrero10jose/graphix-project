@@ -347,6 +347,25 @@ public:
             glm::normalize(cent));
     }
 
+    void loadModel(glm::vec3 currCamPos, float scale, float rot_x, float rot_y, float rot_z,
+        float theta) {
+
+        transformation_matrix = glm::mat4(1.0f);
+
+        // translation
+        transformation_matrix = glm::translate(transformation_matrix,
+            glm::vec3(currCamPos.x, currCamPos.y - 1.f, currCamPos.z + 1.f));
+
+        // scale (assume same values)
+        transformation_matrix = glm::scale(transformation_matrix,
+            glm::vec3(scale, scale, scale));
+
+        // rotate
+        transformation_matrix = glm::rotate(transformation_matrix,
+            glm::radians(theta),
+            glm::normalize(glm::vec3(rot_x, rot_y, rot_z)));
+    }
+
     glm::mat4 getTransMatrix() {
         return transformation_matrix;
     }

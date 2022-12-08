@@ -172,21 +172,40 @@ public:
 			break;
 			// ascend / descend
 		case 'q':
-			cameraPos += glm::normalize(glm::cross(R, currCenter)) * camSpeed;
-			cameraPos2 += glm::normalize(glm::cross(R, currCenter)) * camSpeed;
-			break;
-		case 'e':
 			cameraPos -= glm::normalize(glm::cross(R, currCenter)) * camSpeed;
 			cameraPos2 -= glm::normalize(glm::cross(R, currCenter)) * camSpeed;
 			break;
-		// rotate left / right
-		case 'a':
-			cameraPos.x += camSpeed;
-			cameraPos.y += camSpeed;
+		case 'e':
+			cameraPos += glm::normalize(glm::cross(R, currCenter)) * camSpeed;
+			cameraPos2 += glm::normalize(glm::cross(R, currCenter)) * camSpeed;
 			break;
-
 		}
+	}
 
+	glm::vec3 rotateCamera(float camSpeed, float rot_x) 
+	{
+		float yaw = -90.0f;
+		float pitch = -cameraPos.y;
+		float fov = 90.0f;
+
+		float xoffset = rot_x + cameraPos.x;
+
+		xoffset *= camSpeed;
+
+		yaw += xoffset;
+
+		//prevents the pitch from going out of bounds (prevents backflipping)
+		if (pitch > 89.0f)
+			pitch = 89.0f;
+		if (pitch < -89.0f)
+			pitch = -89.0f;
+
+		glm::vec3 front;
+
+		front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
+		front.y = sin(glm::radians(pitch));
+		front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+		return glm::normalize(front);
 	}
 
 };
