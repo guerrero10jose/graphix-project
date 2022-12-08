@@ -22,6 +22,7 @@ public:
 	glm::mat4 cameraPositionMatrix, cameraOrientation;
 	glm::vec3 F, R, U;
 	glm::mat4 viewMatrix;
+	glm::vec3 cameraPos2;
 
 	glm::vec3 currCenter;
 
@@ -43,6 +44,7 @@ public:
 		z_cam = z;
 
 		cameraPos = glm::vec3(x_cam, y_cam, z_cam);
+		cameraPos2 = glm::vec3(0, 4.f, 20.f);
 
 		// 0 for first person 1 for third person
 		currCam = 0;
@@ -65,7 +67,7 @@ public:
 		}
 		else {
 			projection = glm::perspective(
-				glm::radians(60.0f),
+				glm::radians(45.0f),
 				height / width,
 				0.1f,
 				100.0f
@@ -97,7 +99,8 @@ public:
 
 		switch (currCam) {
 		case 0:
-			currCenter = glm::vec3(0, 0.0f, -1.0f);
+			currCenter = cent;
+				//glm::vec3(0, 0.0f, -1.0f);
 			break;
 		case 1:
 			currCenter = cent;
@@ -134,13 +137,17 @@ public:
 			viewMatrix = glm::lookAt(cameraPos, cameraPos + currCenter, WorldUp);
 			break;
 		case 1:
-			viewMatrix = glm::lookAt(cameraPos, cameraPos + currCenter, WorldUp);
+			viewMatrix = glm::lookAt(cameraPos2, cameraPos2 + currCenter, WorldUp);
 			break;
 		}
 	}
 
 	glm::vec3 getCameraPos() {
 		return cameraPos;
+	}
+
+	glm::vec3 getCameraPos2() {
+		return cameraPos2;
 	}
 
 	glm::mat4 getViewMatrix() {
@@ -157,16 +164,20 @@ public:
 			// forward / backward
 		case 'f':
 			cameraPos += camSpeed * currCenter;
+			cameraPos2 += camSpeed * currCenter;
 			break;
 		case 'b':
 			cameraPos -= camSpeed * currCenter;
+			cameraPos2 -= camSpeed * currCenter;
 			break;
 			// ascend / descend
 		case 'q':
 			cameraPos += glm::normalize(glm::cross(R, currCenter)) * camSpeed;
+			cameraPos2 += glm::normalize(glm::cross(R, currCenter)) * camSpeed;
 			break;
 		case 'e':
 			cameraPos -= glm::normalize(glm::cross(R, currCenter)) * camSpeed;
+			cameraPos2 -= glm::normalize(glm::cross(R, currCenter)) * camSpeed;
 			break;
 		// rotate left / right
 		case 'a':

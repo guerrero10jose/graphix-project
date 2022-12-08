@@ -19,7 +19,7 @@
 float window_height = 800.f, window_width = 800.f;
 float x_mod = 0, mov_forback = 0, mov_updown = 0, rot_leftright = 0;
 //camera center for 3rd person view with mouse movement
-glm::vec3 Center = glm::vec3(0, 0.0f, 0);
+glm::vec3 Center = glm::vec3(0, 0.0f, -1.f);
 
 /* For Player Controls */
 float theta_ship = 180.f;
@@ -82,7 +82,7 @@ void Key_Callback(GLFWwindow* window,
     if (key == GLFW_KEY_A &&
         action == GLFW_REPEAT) {
         //rot_leftright -= cameraSpeed;
-        camera.updateCameraPos(cameraSpeed, 'a');
+        //camera.updateCameraPos(cameraSpeed, 'a');
     }
 
     if (key == GLFW_KEY_D &&
@@ -396,7 +396,7 @@ int main(void)
         case 0:
             glfwSetCursorPosCallback(window, GL_FALSE);
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            currShader = sonar_shaderProg;
+            currShader = shaderProg;
             break;
         case 1:
             glfwSetCursorPosCallback(window, mouse_callback);
@@ -518,7 +518,19 @@ int main(void)
         */
 
         glBindVertexArray(ship.getVAO());
-        ship.loadModel(0.f, -1.f + mov_updown, 10.f + mov_forback, 0.1f, rot_x, rot_y, rot_z, theta_ship);
+        //ship.loadModel(0.f, -1.f + mov_updown, 10.f + mov_forback, 0.1f, rot_x, rot_y, rot_z, theta_ship);
+        /*
+            y - 4.f (cam depth) third person
+        */
+        switch (camera.getCurrentCam()) {
+        case 0:
+            ship.loadModel(0.f, -1.f + mov_updown, 10.f + mov_forback, 0.1f, rot_x, rot_y, rot_z, theta_ship);
+            break;
+        case 1:
+            ship.loadModel(camera.getCameraPos2(), 0.1f, rot_x, rot_y, rot_z, theta_ship, Center);
+            break;
+        }
+        
 
         tex0Address = glGetUniformLocation(currShader, "tex0");
         glBindTexture(GL_TEXTURE_2D, ship.getTexture());
