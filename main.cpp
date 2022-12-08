@@ -23,7 +23,8 @@ glm::vec3 Center = glm::vec3(0, 0.0f, 0);
 
 /* For Player Controls */
 float theta_ship = 180.f;
-float theta_mod = 180.f;
+float theta_mod  = 180.f;
+int light_setting = 0;
 
 //mouse state
 float yaw = -90.0f;
@@ -121,6 +122,10 @@ void Key_Callback(GLFWwindow* window,
         action == GLFW_REPEAT) {
         camera.updateCameraPos(cameraSpeed, 'e');
         mov_updown -= cameraSpeed;
+    }
+    if (key == GLFW_KEY_F && action == GLFW_PRESS) {
+        light_setting++;
+        light_setting = light_setting % 3;
     }
 }
 
@@ -304,6 +309,31 @@ int main(void)
     ship.fillVertexData();
     ship.apply();
 
+    Model chest("treasure_chest.obj", "3D/textures/treasure_chest.jpg");
+    loaded = chest.loadMesh();
+    chest.setTexture2();
+    chest.fillVertexData();
+    chest.apply();
+
+    
+    Model jfish("Jellyfish.obj", "3D/textures/Jellyfish.png");
+    loaded = jfish.loadMesh();
+    jfish.setTexture2();
+    jfish.fillVertexData2();
+    jfish.apply2();
+
+    Model trident("Trident.obj", "3D/textures/Trident.jpg");
+    loaded = trident.loadMesh();
+    trident.setTexture2();
+    trident.fillVertexData();
+    trident.apply();
+
+    Model gfish("gfish.obj", "3D/textures/gfish.png");
+    loaded = gfish.loadMesh();
+    gfish.setTexture();
+    gfish.fillVertexData();
+    gfish.apply();
+    
     float x, y, z;
     x = y = z = 0.0f;
     y = -0.25f;
@@ -318,14 +348,16 @@ int main(void)
     float theta = 90.0f;
 
     /* Lighting Variables */
-    glm::vec3 lightPos = glm::vec3(-10, 3, 0);
+    glm::vec3 lightPos = camera.getCameraPos();
     glm::vec3 lightColor = glm::vec3(1, 1, 1);
+    glm::vec3 lightPos2 = glm::vec3(0, 10, 0);
+    glm::vec3 lightColor2 = glm::vec3(0, 0, 1);
 
-    float ambientStr = 0.1f;
+    float ambientStr = 0.001f;
     glm::vec3 ambientColor = lightColor;
 
-    float specStr = 0.5f;
-    float specPhong = 16.0f;
+    float specStr = 0.2f;
+    float specPhong = 8.0f;
 
     /*
     //functions gets the current window as well as the void function to get control of the mouse
@@ -341,6 +373,21 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        lightPos = camera.getCameraPos();
+        switch (light_setting) {
+            case 0: specStr = 0.2f;
+                    specPhong = 3.0f;
+                    break;
+            case 1: specStr = 0.4f;
+                    specPhong = 6.0f;
+                    break;
+            case 2: specStr = 0.8f;
+                    specPhong = 9.0f;
+                    break;
+            default:
+                specStr = 1.0f;
+                specPhong = 3.0f;
+        }
         //theta += 0.1f;
         theta_ship = theta_mod;
 
@@ -390,12 +437,11 @@ int main(void)
         glUseProgram(currShader);
 
         // load object model
-        shark.loadModel(x, y, z - 10.f, scale_x, rot_x, rot_y, rot_z, theta);
+        shark.loadModel(x, -2.0f, z - 10.f, scale_x, rot_x, rot_y, rot_z, theta);
 
         GLuint tex0Address = glGetUniformLocation(currShader, "tex0");
         glBindTexture(GL_TEXTURE_2D, shark.getTexture());
         glUniform1i(tex0Address, 0);
-
         // diffuse stuff
         unsigned int lightAddress = glGetUniformLocation(currShader, "lightPos");
         glUniform3fv(lightAddress,
@@ -406,7 +452,14 @@ int main(void)
         glUniform3fv(lightColorAddress,
             1,
             glm::value_ptr(lightColor));
-
+        unsigned int lightAddress2 = glGetUniformLocation(shaderProg, "lightPos2");
+        glUniform3fv(lightAddress2,
+            1,
+            glm::value_ptr(lightPos2));
+        unsigned int lightColorAddress2 = glGetUniformLocation(shaderProg, "lightColor2");
+        glUniform3fv(lightColorAddress2,
+            1,
+            glm::value_ptr(lightColor2));
         // ambient stuff
         unsigned int ambientStrAddress = glGetUniformLocation(currShader, "ambientStr");
         glUniform1f(ambientStrAddress, ambientStr);
@@ -454,7 +507,16 @@ int main(void)
         glBindVertexArray(shark.getVAO());
         glDrawArrays(GL_TRIANGLES, 0, shark.getVertexData().size() / 8);
 
-        // 2nd obj
+        /*
+        * 
+        * 
+        * 
+        *               2nd Obj render (ship)
+        * 
+        * 
+        * 
+        */
+
         glBindVertexArray(ship.getVAO());
         ship.loadModel(0.f, -1.f + mov_updown, 10.f + mov_forback, 0.1f, rot_x, rot_y, rot_z, theta_ship);
 
@@ -514,6 +576,284 @@ int main(void)
 
         glDrawArrays(GL_TRIANGLES, 0, ship.getVertexData().size() / 8);
 
+        /*
+        *
+        *
+        *
+        *               3nd Obj render (chest)
+        *
+        *
+        *
+        */
+
+        glBindVertexArray(chest.getVAO());
+        chest.loadModel(-6.0f, y, z - 10.f, scale_x, rot_x, rot_y, rot_z, theta);
+
+        tex0Address = glGetUniformLocation(currShader, "tex0");
+        glBindTexture(GL_TEXTURE_2D, chest.getTexture());
+        glUniform1i(tex0Address, 0);
+
+        // diffuse stuff
+        lightAddress = glGetUniformLocation(currShader, "lightPos");
+        glUniform3fv(lightAddress,
+            1,
+            glm::value_ptr(lightPos));
+
+        lightColorAddress = glGetUniformLocation(currShader, "lightColor");
+        glUniform3fv(lightColorAddress,
+            1,
+            glm::value_ptr(lightColor));
+
+        // ambient stuff
+        ambientStrAddress = glGetUniformLocation(currShader, "ambientStr");
+        glUniform1f(ambientStrAddress, ambientStr);
+
+        ambientColorAddress = glGetUniformLocation(currShader, "ambientColor");
+        glUniform3fv(ambientColorAddress,
+            1,
+            glm::value_ptr(ambientColor));
+
+        // specphong stuff
+        cameraPosAddress = glGetUniformLocation(currShader, "cameraPos");
+        glUniform3fv(cameraPosAddress,
+            1,
+            glm::value_ptr(camera.getCameraPos()));
+
+        specStrAddress = glGetUniformLocation(currShader, "specStr");
+        glUniform1f(specStrAddress, specStr);
+
+        specPhongAddress = glGetUniformLocation(currShader, "specPhong");
+        glUniform1f(specPhongAddress, specPhong);
+
+        projLoc = glGetUniformLocation(currShader, "projection");
+        glUniformMatrix4fv(projLoc,
+            1,
+            GL_FALSE,
+            glm::value_ptr(camera.getProjection()));
+
+        viewLoc = glGetUniformLocation(currShader, "view");
+        glUniformMatrix4fv(viewLoc,
+            1,
+            GL_FALSE,
+            glm::value_ptr(camera.getViewMatrix()));
+
+        transformLoc = glGetUniformLocation(currShader, "transform");
+        glUniformMatrix4fv(transformLoc,
+            1,
+            GL_FALSE,
+            glm::value_ptr(chest.getTransMatrix()));
+
+        glDrawArrays(GL_TRIANGLES, 0, chest.getVertexData().size() / 8);
+
+        /*
+        *
+        *
+        *
+        *               3nd Obj render (jellyfish)
+        *
+        *
+        *
+        */
+        
+        //top right
+        glBindVertexArray(jfish.getVAO());
+        jfish.loadModel(50.0f, 25.0f, z - 10.f, scale_x, rot_x, rot_y, rot_z, theta);
+
+        tex0Address = glGetUniformLocation(currShader, "tex0");
+        glBindTexture(GL_TEXTURE_2D, jfish.getTexture());
+        glUniform1i(tex0Address, 0);
+
+        // diffuse stuff
+        lightAddress = glGetUniformLocation(currShader, "lightPos");
+        glUniform3fv(lightAddress,
+            1,
+            glm::value_ptr(lightPos));
+
+        lightColorAddress = glGetUniformLocation(currShader, "lightColor");
+        glUniform3fv(lightColorAddress,
+            1,
+            glm::value_ptr(lightColor));
+
+        // ambient stuff
+        ambientStrAddress = glGetUniformLocation(currShader, "ambientStr");
+        glUniform1f(ambientStrAddress, ambientStr);
+
+        ambientColorAddress = glGetUniformLocation(currShader, "ambientColor");
+        glUniform3fv(ambientColorAddress,
+            1,
+            glm::value_ptr(ambientColor));
+
+        // specphong stuff
+        cameraPosAddress = glGetUniformLocation(currShader, "cameraPos");
+        glUniform3fv(cameraPosAddress,
+            1,
+            glm::value_ptr(camera.getCameraPos()));
+
+        specStrAddress = glGetUniformLocation(currShader, "specStr");
+        glUniform1f(specStrAddress, specStr);
+
+        specPhongAddress = glGetUniformLocation(currShader, "specPhong");
+        glUniform1f(specPhongAddress, specPhong);
+
+        projLoc = glGetUniformLocation(currShader, "projection");
+        glUniformMatrix4fv(projLoc,
+            1,
+            GL_FALSE,
+            glm::value_ptr(camera.getProjection()));
+
+        viewLoc = glGetUniformLocation(currShader, "view");
+        glUniformMatrix4fv(viewLoc,
+            1,
+            GL_FALSE,
+            glm::value_ptr(camera.getViewMatrix()));
+
+        transformLoc = glGetUniformLocation(currShader, "transform");
+        glUniformMatrix4fv(transformLoc,
+            1,
+            GL_FALSE,
+            glm::value_ptr(jfish.getTransMatrix()));
+
+        glDrawArrays(GL_TRIANGLES, 0, jfish.getVertexData().size() / 5);
+
+        /*
+        *
+        *
+        *
+        *               4th Obj render (trident)
+        *
+        *
+        *
+        */
+
+        //leftmost
+        glBindVertexArray(trident.getVAO());
+        trident.loadModel(-75.0f, -5.0f, -25.0f - 10.f, scale_x, rot_x, rot_y, rot_z, theta);
+
+        tex0Address = glGetUniformLocation(currShader, "tex0");
+        glBindTexture(GL_TEXTURE_2D, trident.getTexture());
+        glUniform1i(tex0Address, 0);
+
+        // diffuse stuff
+        lightAddress = glGetUniformLocation(currShader, "lightPos");
+        glUniform3fv(lightAddress,
+            1,
+            glm::value_ptr(lightPos));
+
+        lightColorAddress = glGetUniformLocation(currShader, "lightColor");
+        glUniform3fv(lightColorAddress,
+            1,
+            glm::value_ptr(lightColor));
+
+        // ambient stuff
+        ambientStrAddress = glGetUniformLocation(currShader, "ambientStr");
+        glUniform1f(ambientStrAddress, ambientStr);
+
+        ambientColorAddress = glGetUniformLocation(currShader, "ambientColor");
+        glUniform3fv(ambientColorAddress,
+            1,
+            glm::value_ptr(ambientColor));
+
+        // specphong stuff
+        cameraPosAddress = glGetUniformLocation(currShader, "cameraPos");
+        glUniform3fv(cameraPosAddress,
+            1,
+            glm::value_ptr(camera.getCameraPos()));
+
+        specStrAddress = glGetUniformLocation(currShader, "specStr");
+        glUniform1f(specStrAddress, specStr);
+
+        specPhongAddress = glGetUniformLocation(currShader, "specPhong");
+        glUniform1f(specPhongAddress, specPhong);
+
+        projLoc = glGetUniformLocation(currShader, "projection");
+        glUniformMatrix4fv(projLoc,
+            1,
+            GL_FALSE,
+            glm::value_ptr(camera.getProjection()));
+
+        viewLoc = glGetUniformLocation(currShader, "view");
+        glUniformMatrix4fv(viewLoc,
+            1,
+            GL_FALSE,
+            glm::value_ptr(camera.getViewMatrix()));
+
+        transformLoc = glGetUniformLocation(currShader, "transform");
+        glUniformMatrix4fv(transformLoc,
+            1,
+            GL_FALSE,
+            glm::value_ptr(trident.getTransMatrix()));
+
+        glDrawArrays(GL_TRIANGLES, 0, trident.getVertexData().size() / 8);
+
+        /*
+        *
+        *
+        *
+        *               5th Obj render (grey fish)
+        *
+        *
+        *
+        */
+
+        glBindVertexArray(gfish.getVAO());
+        gfish.loadModel(2.0f, -10.0f, -50.0f - 10.f, scale_x, rot_x, rot_y, rot_z, theta);
+
+        tex0Address = glGetUniformLocation(currShader, "tex0");
+        glBindTexture(GL_TEXTURE_2D, gfish.getTexture());
+        glUniform1i(tex0Address, 0);
+
+        // diffuse stuff
+        lightAddress = glGetUniformLocation(currShader, "lightPos");
+        glUniform3fv(lightAddress,
+            1,
+            glm::value_ptr(lightPos));
+
+        lightColorAddress = glGetUniformLocation(currShader, "lightColor");
+        glUniform3fv(lightColorAddress,
+            1,
+            glm::value_ptr(lightColor));
+
+        // ambient stuff
+        ambientStrAddress = glGetUniformLocation(currShader, "ambientStr");
+        glUniform1f(ambientStrAddress, ambientStr);
+
+        ambientColorAddress = glGetUniformLocation(currShader, "ambientColor");
+        glUniform3fv(ambientColorAddress,
+            1,
+            glm::value_ptr(ambientColor));
+
+        // specphong stuff
+        cameraPosAddress = glGetUniformLocation(currShader, "cameraPos");
+        glUniform3fv(cameraPosAddress,
+            1,
+            glm::value_ptr(camera.getCameraPos()));
+
+        specStrAddress = glGetUniformLocation(currShader, "specStr");
+        glUniform1f(specStrAddress, specStr);
+
+        specPhongAddress = glGetUniformLocation(currShader, "specPhong");
+        glUniform1f(specPhongAddress, specPhong);
+
+        projLoc = glGetUniformLocation(currShader, "projection");
+        glUniformMatrix4fv(projLoc,
+            1,
+            GL_FALSE,
+            glm::value_ptr(camera.getProjection()));
+
+        viewLoc = glGetUniformLocation(currShader, "view");
+        glUniformMatrix4fv(viewLoc,
+            1,
+            GL_FALSE,
+            glm::value_ptr(camera.getViewMatrix()));
+
+        transformLoc = glGetUniformLocation(currShader, "transform");
+        glUniformMatrix4fv(transformLoc,
+            1,
+            GL_FALSE,
+            glm::value_ptr(gfish.getTransMatrix()));
+
+        glDrawArrays(GL_TRIANGLES, 0, gfish.getVertexData().size() / 8);
+        
         /* Swap front and back buffers */
         glfwSwapBuffers(window);
 
