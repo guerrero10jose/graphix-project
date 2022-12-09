@@ -413,12 +413,13 @@ int main(void)
 
     /* Lighting Variables */
     glm::vec3 lightPos = camera.getCameraPos();
-    glm::vec3 lightColor = glm::vec3(1, 1, 1);
-    glm::vec3 lightPos2 = glm::vec3(0, 10, 0);
-    glm::vec3 lightColor2 = glm::vec3(0, 0, 1);
+    glm::vec3 lightColor;
 
-    float ambientStr = 0.001f;
-    glm::vec3 ambientColor = lightColor;
+    DirLight dirLight(camera.getCameraPos(), glm::vec3(1,1,1));
+    PointLight pointLight; 
+
+    float ambientStr;
+    glm::vec3 ambientColor;
 
     float specStr = 0.2f;
     float specPhong = 8.0f;
@@ -437,37 +438,31 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        lightPos = camera.getCameraPos();
-        switch (light_setting) {
-            case 0: specStr = 0.2f;
-                    specPhong = 3.0f;
-                    break;
-            case 1: specStr = 0.4f;
-                    specPhong = 6.0f;
-                    break;
-            case 2: specStr = 0.8f;
-                    specPhong = 9.0f;
-                    break;
-            default:
-                specStr = 1.0f;
-                specPhong = 3.0f;
-        }
+        dirLight.updatePosition(camera.getCameraPos());
+        lightPos = dirLight.getPosition();
+        lightColor = dirLight.color_brightness;
+        ambientColor = dirLight.ambientColor;
+        ambientStr = dirLight.ambientStr;
+        specPhong = dirLight.specular;
+        specStr = dirLight.specularStr;
+
+        dirLight.setBrightness(light_setting);
         //theta += 0.1f;
         //theta_ship = theta_mod;
         //theta_ship += 0.1f;
 
         /* Camera */
         switch (camera.getCurrentCam()) {
-        case 0:
-            glfwSetCursorPosCallback(window, GL_FALSE);
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            currShader = shaderProg;
-            break;
-        case 1:
-            glfwSetCursorPosCallback(window, mouse_callback);
-            glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-            currShader = shaderProg;
-            break;
+            case 0:
+                glfwSetCursorPosCallback(window, GL_FALSE);
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                currShader = shaderProg;
+                break;
+            case 1:
+                glfwSetCursorPosCallback(window, mouse_callback);
+                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                currShader = shaderProg;
+                break;
         }
 
         camera.project(Center);
@@ -517,14 +512,6 @@ int main(void)
         glUniform3fv(lightColorAddress,
             1,
             glm::value_ptr(lightColor));
-        unsigned int lightAddress2 = glGetUniformLocation(shaderProg, "lightPos2");
-        glUniform3fv(lightAddress2,
-            1,
-            glm::value_ptr(lightPos2));
-        unsigned int lightColorAddress2 = glGetUniformLocation(shaderProg, "lightColor2");
-        glUniform3fv(lightColorAddress2,
-            1,
-            glm::value_ptr(lightColor2));
         // ambient stuff
         unsigned int ambientStrAddress = glGetUniformLocation(currShader, "ambientStr");
         glUniform1f(ambientStrAddress, ambientStr);

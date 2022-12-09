@@ -27,6 +27,11 @@ void main() {
 
 	// apply formula and multiply with light color
 	float diff = max(dot(normal, lightDir), 0.0f);
+
+	if(!(diff == 0.0f)) { 
+		diff = 1/pow(diff,2);
+	}
+
 	vec3 diffuse = diff * lightColor;
 
 	// get the ambient light
