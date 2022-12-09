@@ -48,7 +48,7 @@ public:
 
 		cameraPos = glm::vec3(x_cam, y_cam, z_cam);
 		cameraPos2 = glm::vec3(0, 4.f, 20.f);
-		cameraPos3 = glm::vec3(x_cam, 90.0f, z_cam);
+		cameraPos3 = glm::vec3(x_cam, y_cam, z_cam);
 		orthovec = glm::vec3(0.f, 5.f, 0.f);
 
 		// 0 for first person 1 for third person
@@ -250,13 +250,16 @@ public:
 	void movOrtho(char c, float cameraSpeed) {
 		switch (c) {
 		case 'w':
-			cameraPos3.x += cameraSpeed;
+			cameraPos3.z -= cameraSpeed;
+			//cameraPos3.x += cameraSpeed;
 			break;
 		case 's':
-			cameraPos3.y += cameraSpeed;
+			cameraPos3.z += cameraSpeed;
+			//cameraPos3.y += cameraSpeed; //down movement
 			break;
 		case 'a':
-			cameraPos3.z += cameraSpeed;
+			orthovec.x -= cameraSpeed;
+			//cameraPos3.y += cameraSpeed; 
 			break;
 		case 'd':
 			orthovec.x += cameraSpeed;
