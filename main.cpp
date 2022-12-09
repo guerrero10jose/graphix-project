@@ -61,8 +61,8 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     //prevents the pitch from going out of bounds (prevents backflipping)
     if (pitch > 89.0f)
         pitch = 89.0f;
-    if (pitch < -89.0f)
-        pitch = -89.0f;
+    if (pitch < -10.0f)
+        pitch = -10.0f;
 
     if (yaw > -30.0f)
         yaw = -30.0f;
@@ -435,6 +435,17 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        glEnable(GL_BLEND);
+
+        if (!camera.getCurrentCam()) {
+            glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_DST_COLOR);
+            glBlendEquation(GL_FUNC_SUBTRACT);
+        }
+        else {
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glBlendEquation(GL_FUNC_ADD);
+        }
+
         pointLight.updatePosition(camera.getCameraPos());
         lightPos = pointLight.getPosition();
         lightColor = pointLight.color_brightness;
@@ -453,13 +464,19 @@ int main(void)
             case 0:
                 glfwSetCursorPosCallback(window, GL_FALSE);
                 glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-                currShader = shaderProg;
+                currShader = sonar_shaderProg;
                 break;
             case 1:
                 glfwSetCursorPosCallback(window, mouse_callback);
                 glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
                 currShader = shaderProg;
                 break;
+        }
+
+        if (camera.getCurrPersp()) {
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glBlendEquation(GL_FUNC_ADD);
+            currShader = shaderProg;
         }
 
         camera.project(Center);
