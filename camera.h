@@ -28,6 +28,9 @@ public:
 	glm::vec3 orthovec;
 
 	// Starting Projection (Perspective)
+	/*
+		Initialization of Camera classes, includes pespective and orthographic camera
+	*/
 	Camera(float window_width, float window_height, float x, float y, float z) {
 
 		projection = glm::perspective(
@@ -56,11 +59,13 @@ public:
 		// 0 for persp 1 for ortho
 		currPersp = 0;
 	}
-
+	
+	// Gets current camera in the model class
 	int getCurrentCam() {
 		return currCam;
 	}
 
+	// Changes camera projections if a key was clicked, refer to main.cpp - key_callback()
 	void changeCam() {
 		if (currCam) {
 			projection = glm::perspective(
@@ -85,7 +90,7 @@ public:
 
 		savedProj = projection;
 	}
-
+	//changes the perspective of the camera is clicked refer to main.cpp - key_callback()
 	void changePerspective() {
 
 		// if ortho change to persp
@@ -112,11 +117,12 @@ public:
 	}
 
 
-
+	//gets the projection values of the camera 
 	glm::mat4 getProjection() {
 		return projection;
 	}
 
+	//initializes project class
 	void project(glm::vec3 cent) {
 
 		cameraPositionMatrix = glm::translate(glm::mat4(1.0f),
@@ -177,10 +183,12 @@ public:
 
 	}
 
+	//gets the camera position of CameraPos variable
 	glm::vec3 getCameraPos() {
 		return cameraPos;
 	}
 
+	//gets the camera position of CameraPos variable
 	glm::vec3 getCameraPos2() {
 		return cameraPos2;
 	}
