@@ -36,7 +36,7 @@ float lastY = window_height / 2.0;
 
 // Camera (perspective initial)
 Camera camera(window_width, window_height, 0, -145.f, 10.f);
-float cameraSpeed = 1.f;
+float cameraSpeed = 5.f;
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 
@@ -428,6 +428,7 @@ int main(void)
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     */
     GLuint currShader;
+    float currDepth = -145.f;
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -436,6 +437,12 @@ int main(void)
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glEnable(GL_BLEND);
+
+        if (int(currDepth) == int(camera.getDepth())) {
+            // Print
+            std::cout <<  "Current Depth: " + std::to_string(currDepth) + "\n";
+        }
+
 
         if (!camera.getCurrentCam()) {
             glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_DST_COLOR);
