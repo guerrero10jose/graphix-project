@@ -36,7 +36,7 @@ float lastY = window_height / 2.0;
 
 // Camera (perspective initial)
 Camera camera(window_width, window_height, 0, -145.f, 10.f);
-float cameraSpeed = 1.f;
+float cameraSpeed = 5.f;
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 
@@ -61,13 +61,13 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     //prevents the pitch from going out of bounds (prevents backflipping)
     if (pitch > 89.0f)
         pitch = 89.0f;
-    if (pitch < -89.0f)
-        pitch = -89.0f;
+    if (pitch < -10.0f)
+        pitch = -10.0f;
 
-    if (yaw > -60.0f)
-        yaw = -60.0f;
-    if (yaw < -120.0f)
-        yaw = -120.0f;
+    if (yaw > -30.0f)
+        yaw = -30.0f;
+    if (yaw < -150.0f)
+        yaw = -150.0f;
 
     glm::vec3 front;
 
@@ -183,14 +183,6 @@ void Key_Callback(GLFWwindow* window,
         light_setting++;
         light_setting = light_setting % 3;
     }
-}
-
-void EmptyCallBack(GLFWwindow* window,
-    int key,
-    int scancode,
-    int action,
-    int mods) {
-    // just to switch between disabled and not
 }
 
 int main(void)
@@ -435,6 +427,7 @@ int main(void)
     glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
     */
     GLuint currShader;
+    float currDepth = -145.f;
 
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window))
@@ -442,7 +435,23 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // Light source will follow the camera's position
+        glEnable(GL_BLEND);
+
+        if (int(currDepth) == int(camera.getDepth())) {
+            // Print
+            std::cout <<  "Current Depth: " + std::to_string(currDepth) + "\n";
+        }
+
+
+        if (!camera.getCurrentCam()) {
+            glBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_DST_COLOR);
+            glBlendEquation(GL_FUNC_SUBTRACT);
+        }
+        else {
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glBlendEquation(GL_FUNC_ADD);
+        }
+
         pointLight.updatePosition(camera.getCameraPos());
 
         lightPos = pointLight.getPosition();
@@ -465,13 +474,19 @@ int main(void)
             case 0:
                 glfwSetCursorPosCallback(window, GL_FALSE);
                 glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-                currShader = shaderProg;
+                currShader = sonar_shaderProg;
                 break;
             case 1:
                 glfwSetCursorPosCallback(window, mouse_callback);
                 glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
                 currShader = shaderProg;
                 break;
+        }
+
+        if (camera.getCurrPersp()) {
+            glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+            glBlendEquation(GL_FUNC_ADD);
+            currShader = shaderProg;
         }
 
         camera.project(Center);

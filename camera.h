@@ -47,7 +47,7 @@ public:
 		z_cam = z;
 
 		cameraPos = glm::vec3(x_cam, y_cam, z_cam);
-		cameraPos2 = glm::vec3(0, 4.f, 20.f);
+		cameraPos2 = glm::vec3(0, y_cam, 20.f);
 		cameraPos3 = glm::vec3(x_cam, y_cam, z_cam);
 		orthovec = glm::vec3(0.f, 5.f, 0.f);
 
@@ -213,6 +213,12 @@ public:
 		case 'e':
 			cameraPos += glm::normalize(glm::cross(R, currCenter)) * camSpeed;
 			cameraPos2 += glm::normalize(glm::cross(R, currCenter)) * camSpeed;
+
+			if (int(cameraPos2.y) >= 0 || int(cameraPos.y) >= 0) {
+				cameraPos2.y = 0.f;
+				cameraPos.y = 0.f;
+			}
+
 			break;
 		}
 	}
@@ -220,7 +226,7 @@ public:
 	glm::vec3 rotateCamera(float camSpeed, float rot_x) 
 	{
 		float yaw = -90.0f;
-		float pitch = -cameraPos.y;
+		float pitch = 0.f;
 		float fov = 90.0f;
 
 		float xoffset = rot_x + cameraPos.x;
@@ -245,6 +251,15 @@ public:
 
 	int getCurrPersp() {
 		return currPersp;
+	}
+
+	float getDepth() {
+		if (currPersp == 0) {
+			if (currCam == 0)
+				return cameraPos.y;
+			else
+				return cameraPos2.y;
+		}
 	}
 
 	void movOrtho(char c, float cameraSpeed) {

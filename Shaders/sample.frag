@@ -23,6 +23,12 @@ out vec4 FragColor;
 void main() {
 	// FragColor = vec4(0.7f, 0f, 0f, 1f);
 
+	// Current pixel
+	vec4 pixelColor = texture(tex0, texCoord);
+	if(pixelColor.a < 0.1) {
+		discard;
+	}
+
 	// get required parameter for diffuse formula
 	vec3 normal = normalize(normCoord);
 	vec3 lightDir = normalize(lightPos - fragPos);
