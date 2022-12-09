@@ -412,9 +412,10 @@ int main(void)
     float theta = 90.0f;
 
     /*
-        Initialization of the DirLight object.
-
-
+        Initialization of the Point and Direction objects, which inherits from the Light parent class.
+        1. Point Light controls the light emitted from the submarine. It illuminates objects as the 
+           submarine and the camera moves around
+        2. Direction Light is for the light emitted top down to simulate the diffusion of light entering water.
     */
     PointLight pointLight(camera.getCameraPos(), glm::vec3(1,1,1));
     DirectionLight dirLight(glm::vec3(0,5,0), glm::vec3(0.19, 0.41, 0.35));
@@ -422,10 +423,8 @@ int main(void)
     glm::vec3 lightColor;
     glm::vec3 sun_lightPos = dirLight.position;
     glm::vec3 sun_lightColor = dirLight.color;
-
     float ambientStr;
     glm::vec3 ambientColor;
-
     float specStr = 0.2f;
     float specPhong = 8.0f;
 
@@ -443,7 +442,9 @@ int main(void)
         /* Render here */
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+        // Light source will follow the camera's position
         pointLight.updatePosition(camera.getCameraPos());
+
         lightPos = pointLight.getPosition();
         lightColor = pointLight.color_brightness;
         ambientColor = pointLight.ambientColor;
@@ -451,7 +452,10 @@ int main(void)
         specPhong = pointLight.specular;
         specStr = pointLight.specularStr;
 
+        // Pressing 'F' will cycle through the "flashlight" light strength
         pointLight.setBrightness(light_setting);
+
+
         //theta += 0.1f;
         //theta_ship = theta_mod;
         //theta_ship += 0.1f;
@@ -517,13 +521,13 @@ int main(void)
         glUniform3fv(lightColorAddress,
             1,
             glm::value_ptr(lightColor));
-        unsigned int lightAddress2 = glGetUniformLocation(currShader, "sun_lightPos");
-        glUniform3fv(lightAddress2,
+        unsigned int sun_lightAddress = glGetUniformLocation(currShader, "sun_lightPos");
+        glUniform3fv(sun_lightAddress,
             1,
             glm::value_ptr(sun_lightPos));
 
-        unsigned int lightColorAddress2 = glGetUniformLocation(currShader, "sun_lightColor");
-        glUniform3fv(lightColorAddress2,
+        unsigned int sun_lightColorAddress = glGetUniformLocation(currShader, "sun_lightColor");
+        glUniform3fv(sun_lightColorAddress,
             1,
             glm::value_ptr(sun_lightColor));
         // ambient stuff
@@ -613,13 +617,13 @@ int main(void)
         glUniform3fv(lightColorAddress,
             1,
             glm::value_ptr(lightColor));
-        lightAddress2 = glGetUniformLocation(currShader, "sun_lightPos");
-        glUniform3fv(lightAddress2,
+        sun_lightAddress = glGetUniformLocation(currShader, "sun_lightPos");
+        glUniform3fv(sun_lightAddress,
             1,
             glm::value_ptr(sun_lightPos));
 
-        lightColorAddress2 = glGetUniformLocation(currShader, "sun_lightColor");
-        glUniform3fv(lightColorAddress2,
+        sun_lightColorAddress = glGetUniformLocation(currShader, "sun_lightColor");
+        glUniform3fv(sun_lightColorAddress,
             1,
             glm::value_ptr(sun_lightColor));
         // ambient stuff
@@ -690,13 +694,13 @@ int main(void)
         glUniform3fv(lightColorAddress,
             1,
             glm::value_ptr(lightColor));
-        lightAddress2 = glGetUniformLocation(currShader, "sun_lightPos");
-        glUniform3fv(lightAddress2,
+        sun_lightAddress = glGetUniformLocation(currShader, "sun_lightPos");
+        glUniform3fv(sun_lightAddress,
             1,
             glm::value_ptr(sun_lightPos));
 
-        lightColorAddress2 = glGetUniformLocation(currShader, "sun_lightColor");
-        glUniform3fv(lightColorAddress2,
+        sun_lightColorAddress = glGetUniformLocation(currShader, "sun_lightColor");
+        glUniform3fv(sun_lightColorAddress,
             1,
             glm::value_ptr(sun_lightColor));
         // ambient stuff
@@ -768,13 +772,13 @@ int main(void)
         glUniform3fv(lightColorAddress,
             1,
             glm::value_ptr(lightColor));
-        lightAddress2 = glGetUniformLocation(currShader, "sun_lightPos");
-        glUniform3fv(lightAddress2,
+        sun_lightAddress = glGetUniformLocation(currShader, "sun_lightPos");
+        glUniform3fv(sun_lightAddress,
             1,
             glm::value_ptr(sun_lightPos));
 
-        lightColorAddress2 = glGetUniformLocation(currShader, "sun_lightColor");
-        glUniform3fv(lightColorAddress2,
+        sun_lightColorAddress = glGetUniformLocation(currShader, "sun_lightColor");
+        glUniform3fv(sun_lightColorAddress,
             1,
             glm::value_ptr(sun_lightColor));
         // ambient stuff
@@ -846,13 +850,13 @@ int main(void)
         glUniform3fv(lightColorAddress,
             1,
             glm::value_ptr(lightColor));
-        lightAddress2 = glGetUniformLocation(currShader, "sun_lightPos");
-        glUniform3fv(lightAddress2,
+        sun_lightAddress = glGetUniformLocation(currShader, "sun_lightPos");
+        glUniform3fv(sun_lightAddress,
             1,
             glm::value_ptr(sun_lightPos));
 
-        lightColorAddress2 = glGetUniformLocation(currShader, "sun_lightColor");
-        glUniform3fv(lightColorAddress2,
+        sun_lightColorAddress = glGetUniformLocation(currShader, "sun_lightColor");
+        glUniform3fv(sun_lightColorAddress,
             1,
             glm::value_ptr(sun_lightColor));
         // ambient stuff
@@ -923,13 +927,13 @@ int main(void)
         glUniform3fv(lightColorAddress,
             1,
             glm::value_ptr(lightColor));
-        lightAddress2 = glGetUniformLocation(currShader, "sun_lightPos");
-        glUniform3fv(lightAddress2,
+        sun_lightAddress = glGetUniformLocation(currShader, "sun_lightPos");
+        glUniform3fv(sun_lightAddress,
             1,
             glm::value_ptr(sun_lightPos));
 
-        lightColorAddress2 = glGetUniformLocation(currShader, "sun_lightColor");
-        glUniform3fv(lightColorAddress2,
+        sun_lightColorAddress = glGetUniformLocation(currShader, "sun_lightColor");
+        glUniform3fv(sun_lightColorAddress,
             1,
             glm::value_ptr(sun_lightColor));
         // ambient stuff
