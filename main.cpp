@@ -35,7 +35,7 @@ float lastX = window_width / 2.0;
 float lastY = window_height / 2.0;
 
 // Camera (perspective initial)
-Camera camera(window_width, window_height, 0, 0, 10.f);
+Camera camera(window_width, window_height, 0, -145.f, 10.f);
 float cameraSpeed = 1.f;
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
@@ -497,7 +497,7 @@ int main(void)
         glUseProgram(currShader);
 
         // load object model
-        shark.loadModel(x, -2.0f, z - 10.f, scale_x, rot_x, rot_y, rot_z, theta);
+        shark.loadModel(-35, -165.0f, -70.0f, scale_x, rot_x, rot_y, rot_z, theta);
 
         GLuint tex0Address = glGetUniformLocation(currShader, "tex0");
         glBindTexture(GL_TEXTURE_2D, shark.getTexture());
@@ -652,7 +652,7 @@ int main(void)
         */
 
         glBindVertexArray(chest.getVAO());
-        chest.loadModel(-6.0f, y, z - 10.f, scale_x, rot_x, rot_y, rot_z, theta);
+        chest.loadModel(-13.0f, -148.0f, -92.0f, scale_x, rot_x, rot_y, rot_z, theta);
 
         tex0Address = glGetUniformLocation(currShader, "tex0");
         glBindTexture(GL_TEXTURE_2D, chest.getTexture());
@@ -722,7 +722,7 @@ int main(void)
         
         //top right
         glBindVertexArray(jfish.getVAO());
-        jfish.loadModel(50.0f, 25.0f, z - 10.f, scale_x, rot_x, rot_y, rot_z, theta);
+        jfish.loadModel(39.0f, -132.0f, -112.0f, scale_x, rot_x, rot_y, rot_z, theta);
 
         tex0Address = glGetUniformLocation(currShader, "tex0");
         glBindTexture(GL_TEXTURE_2D, jfish.getTexture());
@@ -792,7 +792,7 @@ int main(void)
 
         //leftmost
         glBindVertexArray(trident.getVAO());
-        trident.loadModel(-75.0f, -5.0f, -25.0f - 10.f, scale_x, rot_x, rot_y, rot_z, theta);
+        trident.loadModel(-14.0f, -126.0f, -85.0f, scale_x, rot_x, rot_y, rot_z, theta);
 
         tex0Address = glGetUniformLocation(currShader, "tex0");
         glBindTexture(GL_TEXTURE_2D, trident.getTexture());
@@ -861,7 +861,7 @@ int main(void)
         */
 
         glBindVertexArray(gfish.getVAO());
-        gfish.loadModel(2.0f, -10.0f, -50.0f - 10.f, scale_x, rot_x, rot_y, rot_z, theta);
+        gfish.loadModel(23.0f, -128.0f, -140.0f, scale_x, rot_x, rot_y, rot_z, theta);
 
         tex0Address = glGetUniformLocation(currShader, "tex0");
         glBindTexture(GL_TEXTURE_2D, gfish.getTexture());

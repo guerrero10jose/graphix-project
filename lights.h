@@ -32,7 +32,7 @@ public:
 		this->ambientColor = glm::vec3(0.04, 0.08, 0.24);
 		this->ambientStr = 0.1f;
 	}
-	glm::vec3 setBrightness(int x) {
+	void setBrightness(int x) {
 		switch (x) {
 			case 0: specularStr = 0.2f;
 					specular = 1.0f;
