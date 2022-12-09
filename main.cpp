@@ -64,10 +64,10 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
     if (pitch < -89.0f)
         pitch = -89.0f;
 
-    if (yaw > -60.0f)
-        yaw = -60.0f;
-    if (yaw < -120.0f)
-        yaw = -120.0f;
+    if (yaw > -30.0f)
+        yaw = -30.0f;
+    if (yaw < -150.0f)
+        yaw = -150.0f;
 
     glm::vec3 front;
 
@@ -183,14 +183,6 @@ void Key_Callback(GLFWwindow* window,
         light_setting++;
         light_setting = light_setting % 3;
     }
-}
-
-void EmptyCallBack(GLFWwindow* window,
-    int key,
-    int scancode,
-    int action,
-    int mods) {
-    // just to switch between disabled and not
 }
 
 int main(void)

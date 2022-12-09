@@ -47,7 +47,7 @@ public:
 		z_cam = z;
 
 		cameraPos = glm::vec3(x_cam, y_cam, z_cam);
-		cameraPos2 = glm::vec3(0, 4.f, 20.f);
+		cameraPos2 = glm::vec3(0, y_cam, 20.f);
 		cameraPos3 = glm::vec3(x_cam, y_cam, z_cam);
 		orthovec = glm::vec3(0.f, 5.f, 0.f);
 
@@ -220,7 +220,7 @@ public:
 	glm::vec3 rotateCamera(float camSpeed, float rot_x) 
 	{
 		float yaw = -90.0f;
-		float pitch = -cameraPos.y;
+		float pitch = 0.f;
 		float fov = 90.0f;
 
 		float xoffset = rot_x + cameraPos.x;
