@@ -193,14 +193,24 @@ public:
 		return cameraPos2;
 	}
 
+	/*
+		Returns the view matrix of the camera
+	*/
 	glm::mat4 getViewMatrix() {
 		return viewMatrix;
 	}
 
+	/* 
+		Returns the Current Center of the Ship / View
+	*/
 	glm::vec3 getCurrCenter() {
 		return currCenter;
 	}
 
+	/*
+		Based on hotkeys, updates camerapos accordingly,
+		for both first person and third person view
+	*/
 	void updateCameraPos(float camSpeed, char c) {
 
 		switch (c) {
@@ -231,6 +241,10 @@ public:
 		}
 	}
 
+	/*
+		Function that rotates camera upon key press, used for
+		first person view camera
+	*/
 	glm::vec3 rotateCamera(float camSpeed, float rot_x) 
 	{
 		float yaw = -90.0f;
@@ -257,10 +271,17 @@ public:
 		return glm::normalize(front);
 	}
 
+	/*
+		Returns the Current Perspective (Ortho/Perspective) of the
+		Camera
+	*/
 	int getCurrPersp() {
 		return currPersp;
 	}
 
+	/*
+		Returns the Current Depth of the Ship
+	*/
 	float getDepth() {
 		if (currPersp == 0) {
 			if (currCam == 0)
@@ -270,6 +291,11 @@ public:
 		}
 	}
 
+	/* 
+		Pan camera during orthographic view 
+		WS - Move camera up and down
+		AD - Rotate around the ship axis to see depth
+	*/
 	void movOrtho(char c, float cameraSpeed) {
 		switch (c) {
 		case 'w':
