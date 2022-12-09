@@ -4,6 +4,8 @@ uniform sampler2D tex0;
 
 uniform vec3 lightPos;
 uniform vec3 lightColor;
+uniform vec3 sun_lightPos;
+uniform vec3 sun_lightColor;
 
 uniform float ambientStr;
 uniform vec3 ambientColor;
@@ -24,15 +26,16 @@ void main() {
 	// get required parameter for diffuse formula
 	vec3 normal = normalize(normCoord);
 	vec3 lightDir = normalize(lightPos - fragPos);
+	vec3 lightDir2 = normalize(sun_lightPos - fragPos);
 
 	// apply formula and multiply with light color
 	float diff = max(dot(normal, lightDir), 0.0f);
-
+	float diff2 = max(dot(normal, lightDir2), 0.0f);
 	if(!(diff == 0.0f)) { 
 		diff = 1/pow(diff,2);
 	}
 
-	vec3 diffuse = diff * lightColor;
+	vec3 diffuse = (diff * lightColor) + (diff2 * sun_lightColor);
 
 	// get the ambient light
 	vec3 ambientCol = ambientColor * ambientStr;

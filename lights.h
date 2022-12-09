@@ -18,25 +18,28 @@ public:
 	float specular;
 	float specularStr;
 	glm::vec3 color;
+
 };
 
-class DirLight : public Light {
+class PointLight : public Light {
 public:
 	glm::vec3 color_brightness;
 
 	glm::vec3 direction;
-	DirLight(glm::vec3 position, glm::vec3 color) {
+	// Class constructor
+	PointLight(glm::vec3 position, glm::vec3 color) {
 		this->position = position;
 		this->color = color; 
 		this->color_brightness = glm::vec3(0.1, 0.1, 0.1);
 		this->ambientColor = glm::vec3(0.04, 0.08, 0.24);
 		this->ambientStr = 0.1f;
 	}
+	// This method controls the strength of the light emitted from the submarine by pressing the 'F' button
 	void setBrightness(int x) {
 		switch (x) {
 			case 0: specularStr = 0.2f;
 					specular = 1.0f;
-					color_brightness = glm::vec3(0.10, 0.10, 0.10);
+					color_brightness = glm::vec3(0.1, 0.1, 0.1);
 					break;
 			case 1: specularStr = 0.4f;
 					specular = 6.0f;
@@ -44,12 +47,12 @@ public:
 					break;
 			case 2: specularStr = 0.8f;
 					specular = 9.0f;
-					color_brightness = glm::vec3(0.8, 0.8, 0.8);
+					color_brightness = glm::vec3(0.7, 0.7, 0.7);
 					break;
 			default:
 					specularStr = 0.20f;
 					specular = 3.0f;
-					color_brightness = glm::vec3(0.10, 0.10, 0.10);
+					color_brightness = glm::vec3(0.1, 0.1, 0.1);
 		}
 	}
 	void assignlightDir(glm::vec3 newDir) {
@@ -66,14 +69,11 @@ public:
 	}
 };
 
-class PointLight : public Light {
+class DirectionLight : public Light {
 public:
-	glm::vec3 position;
-	float constant;
-	float linear;
-	float quadratic;
-	glm::vec3 ambient;
-	glm::vec3 diffuse;
-	glm::vec3 specular;
 
+	DirectionLight(glm::vec3 position, glm::vec3 color) {
+		this->position = position;
+		this->color = color;
+	}
 };
