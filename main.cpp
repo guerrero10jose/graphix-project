@@ -180,6 +180,7 @@ void Key_Callback(GLFWwindow* window,
     }
 
     if (key == GLFW_KEY_F && action == GLFW_PRESS) {
+        // Cycle between light settings with values from 0-2
         light_setting++;
         light_setting = light_setting % 3;
     }
@@ -1025,13 +1026,13 @@ int main(void)
         glUniform3fv(lightColorAddress,
             1,
             glm::value_ptr(lightColor));
-        lightAddress2 = glGetUniformLocation(currShader, "sun_lightPos");
-        glUniform3fv(lightAddress2,
+        sun_lightAddress = glGetUniformLocation(currShader, "sun_lightPos");
+        glUniform3fv(sun_lightAddress,
             1,
             glm::value_ptr(sun_lightPos));
 
-        lightColorAddress2 = glGetUniformLocation(currShader, "sun_lightColor");
-        glUniform3fv(lightColorAddress2,
+        sun_lightColorAddress = glGetUniformLocation(currShader, "sun_lightColor");
+        glUniform3fv(sun_lightColorAddress,
             1,
             glm::value_ptr(sun_lightColor));
         // ambient stuff
