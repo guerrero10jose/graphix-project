@@ -213,6 +213,12 @@ public:
 		case 'e':
 			cameraPos += glm::normalize(glm::cross(R, currCenter)) * camSpeed;
 			cameraPos2 += glm::normalize(glm::cross(R, currCenter)) * camSpeed;
+
+			if (int(cameraPos2.y) >= 0 || int(cameraPos.y) >= 0) {
+				cameraPos2.y = 0.f;
+				cameraPos.y = 0.f;
+			}
+
 			break;
 		}
 	}
@@ -245,6 +251,15 @@ public:
 
 	int getCurrPersp() {
 		return currPersp;
+	}
+
+	float getDepth() {
+		if (currPersp == 0) {
+			if (currCam == 0)
+				return cameraPos.y;
+			else
+				return cameraPos2.y;
+		}
 	}
 
 	void movOrtho(char c, float cameraSpeed) {
