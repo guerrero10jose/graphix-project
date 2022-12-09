@@ -124,19 +124,14 @@ public:
 
 		WorldUp = glm::vec3(0, 1.0f, 0);
 
-		if (currPersp == 0) {
-			switch (currCam) {
-			case 0:
-				currCenter = cent;
+		switch (currCam) {
+		case 0:
+			currCenter = cent;
 				//glm::vec3(0, 0.0f, -1.0f);
-				break;
-			case 1:
-				currCenter = cent;
-				break;
-			}
-		}
-		else {
-			currCenter = orthovec;
+			break;
+		case 1:
+			currCenter = cent;
+			break;
 		}
 
 		// forward
@@ -177,7 +172,7 @@ public:
 			}
 		}
 		else {
-			viewMatrix = glm::lookAt(cameraPos3, cameraPos3 + currCenter, glm::vec3(0, 0, -1.0f));
+			viewMatrix = glm::lookAt(cameraPos3, cameraPos3 + orthovec, glm::vec3(0, 0, -1.0f));
 		}
 
 	}
@@ -255,16 +250,16 @@ public:
 	void movOrtho(char c, float cameraSpeed) {
 		switch (c) {
 		case 'w':
-			cameraPos3 += cameraSpeed * currCenter;
+			cameraPos3.x += cameraSpeed;
 			break;
 		case 's':
-			cameraPos3 -= cameraSpeed * currCenter;
+			cameraPos3.y += cameraSpeed;
 			break;
 		case 'a':
-			cameraPos3 += cameraSpeed;
+			cameraPos3.z += cameraSpeed;
 			break;
 		case 'd':
-			cameraPos3 += cameraSpeed;
+			orthovec.x += cameraSpeed;
 			break;
 		}
 	}
