@@ -1,3 +1,15 @@
+/*
+Members:
+Ilagan, Vincent B.
+Guerrero, Jose Gerardo O.
+Rosima, Rayvhen Mico M.
+
+Machine Project
+
+https://github.com/guerrero10jose/graphix-project
+
+*/
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
