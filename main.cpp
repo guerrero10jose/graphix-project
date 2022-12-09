@@ -415,6 +415,7 @@ int main(void)
         1. Point Light controls the light emitted from the submarine. It illuminates objects as the 
            submarine and the camera moves around
         2. Direction Light is for the light emitted top down to simulate the diffusion of light entering water.
+
     */
     PointLight pointLight(camera.getCameraPos(), glm::vec3(1,1,1));
     DirectionLight dirLight(glm::vec3(0,5,0), glm::vec3(0.19, 0.41, 0.35));
@@ -459,6 +460,7 @@ int main(void)
             glBlendEquation(GL_FUNC_ADD);
         }
 
+        // The light source moves along with the submarine object and the camera
         pointLight.updatePosition(camera.getCameraPos());
 
         lightPos = pointLight.getPosition();

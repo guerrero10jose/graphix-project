@@ -20,12 +20,16 @@ public:
 	glm::vec3 color;
 
 };
-
+/*
+	This class is used to represent the light that emits from the submarine onto the objects 
+	in the game world. It is able to control the intensity of its light whenever the user
+	presses the 'F' key.
+*/
 class PointLight : public Light {
 public:
 	glm::vec3 color_brightness;
-
 	glm::vec3 direction;
+
 	// Class constructor
 	PointLight(glm::vec3 position, glm::vec3 color) {
 		this->position = position;
@@ -68,6 +72,11 @@ public:
 		return position;
 	}
 };
+
+/*
+	This class is primarily used to cast a light downwards onto the objects from the top.
+	The values needed are already inherited from the parent Light class. 
+*/
 
 class DirectionLight : public Light {
 public:
