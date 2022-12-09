@@ -473,11 +473,6 @@ int main(void)
         // Pressing 'F' will cycle through the "flashlight" light strength
         pointLight.setBrightness(light_setting);
 
-
-        //theta += 0.1f;
-        //theta_ship = theta_mod;
-        //theta_ship += 0.1f;
-
         /* Camera */
         switch (camera.getCurrentCam()) {
             case 0:

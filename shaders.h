@@ -22,6 +22,7 @@ public:
 	// For Shader Compilation
 	GLuint shader;
 
+	// Shader Constructor. Includes source and specification of fragment or vertex
 	Shader(const char* source, char type) {
 		shaderType = type;
 
@@ -33,6 +34,9 @@ public:
 		compileShader();
 	}
 
+	/*
+		Compile Shaders
+	*/
 	void compileShader() {
 
 		// vertex shader

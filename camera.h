@@ -28,6 +28,9 @@ public:
 	glm::vec3 orthovec;
 
 	// Starting Projection (Perspective)
+	/*
+		Initialization of Camera classes, includes pespective and orthographic camera
+	*/
 	Camera(float window_width, float window_height, float x, float y, float z) {
 
 		projection = glm::perspective(
@@ -56,11 +59,13 @@ public:
 		// 0 for persp 1 for ortho
 		currPersp = 0;
 	}
-
+	
+	// Gets current camera in the model class
 	int getCurrentCam() {
 		return currCam;
 	}
 
+	// Changes camera projections if a key was clicked, refer to main.cpp - key_callback()
 	void changeCam() {
 		if (currCam) {
 			projection = glm::perspective(
@@ -85,7 +90,7 @@ public:
 
 		savedProj = projection;
 	}
-
+	//changes the perspective of the camera is clicked refer to main.cpp - key_callback()
 	void changePerspective() {
 
 		// if ortho change to persp
@@ -112,11 +117,12 @@ public:
 	}
 
 
-
+	//gets the projection values of the camera 
 	glm::mat4 getProjection() {
 		return projection;
 	}
 
+	//initializes project class
 	void project(glm::vec3 cent) {
 
 		cameraPositionMatrix = glm::translate(glm::mat4(1.0f),
@@ -177,22 +183,34 @@ public:
 
 	}
 
+	//gets the camera position of CameraPos variable
 	glm::vec3 getCameraPos() {
 		return cameraPos;
 	}
 
+	//gets the camera position of CameraPos variable
 	glm::vec3 getCameraPos2() {
 		return cameraPos2;
 	}
 
+	/*
+		Returns the view matrix of the camera
+	*/
 	glm::mat4 getViewMatrix() {
 		return viewMatrix;
 	}
 
+	/* 
+		Returns the Current Center of the Ship / View
+	*/
 	glm::vec3 getCurrCenter() {
 		return currCenter;
 	}
 
+	/*
+		Based on hotkeys, updates camerapos accordingly,
+		for both first person and third person view
+	*/
 	void updateCameraPos(float camSpeed, char c) {
 
 		switch (c) {
@@ -223,6 +241,10 @@ public:
 		}
 	}
 
+	/*
+		Function that rotates camera upon key press, used for
+		first person view camera
+	*/
 	glm::vec3 rotateCamera(float camSpeed, float rot_x) 
 	{
 		float yaw = -90.0f;
@@ -249,10 +271,17 @@ public:
 		return glm::normalize(front);
 	}
 
+	/*
+		Returns the Current Perspective (Ortho/Perspective) of the
+		Camera
+	*/
 	int getCurrPersp() {
 		return currPersp;
 	}
 
+	/*
+		Returns the Current Depth of the Ship
+	*/
 	float getDepth() {
 		if (currPersp == 0) {
 			if (currCam == 0)
@@ -262,6 +291,11 @@ public:
 		}
 	}
 
+	/* 
+		Pan camera during orthographic view 
+		WS - Move camera up and down
+		AD - Rotate around the ship axis to see depth
+	*/
 	void movOrtho(char c, float cameraSpeed) {
 		switch (c) {
 		case 'w':
