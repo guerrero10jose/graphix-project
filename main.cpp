@@ -36,7 +36,7 @@ float lastY = window_height / 2.0;
 
 // Camera (perspective initial)
 Camera camera(window_width, window_height, 0, -145.f, 10.f);
-float cameraSpeed = 5.f;
+float cameraSpeed = 1.f;
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos) {
 
@@ -443,10 +443,10 @@ int main(void)
 
         glEnable(GL_BLEND);
 
-        if (int(currDepth) == int(camera.getDepth())) {
-            // Print
-            std::cout <<  "Current Depth: " + std::to_string(currDepth) + "\n";
-        }
+        
+        // Print
+        currDepth = camera.getDepth();
+        std::cout <<  "Current Depth: " + std::to_string(currDepth) + "\n";
 
 
         if (!camera.getCurrentCam()) {
@@ -1025,12 +1025,12 @@ int main(void)
         glUniform3fv(lightColorAddress,
             1,
             glm::value_ptr(lightColor));
-        lightAddress2 = glGetUniformLocation(currShader, "sun_lightPos");
+        unsigned int lightAddress2 = glGetUniformLocation(currShader, "sun_lightPos");
         glUniform3fv(lightAddress2,
             1,
             glm::value_ptr(sun_lightPos));
 
-        lightColorAddress2 = glGetUniformLocation(currShader, "sun_lightColor");
+        unsigned int lightColorAddress2 = glGetUniformLocation(currShader, "sun_lightColor");
         glUniform3fv(lightColorAddress2,
             1,
             glm::value_ptr(sun_lightColor));
