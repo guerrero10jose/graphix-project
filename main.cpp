@@ -84,72 +84,113 @@ void Key_Callback(GLFWwindow* window,
     int mods)
 {
 
-    if (key == GLFW_KEY_A &&
-        action == GLFW_REPEAT) {
+    if (camera.getCurrPersp() == 0) {
+        if (key == GLFW_KEY_A &&
+            action == GLFW_REPEAT) {
 
-        switch (camera.getCurrentCam()) {
-        case 0:
-            rot_leftright -= cameraSpeed;
-            Center = camera.rotateCamera(cameraSpeed, rot_leftright);
-            theta_ship += cameraSpeed;
-            break;
-        case 1:
-            theta_ship -= cameraSpeed;
-            break;
+            switch (camera.getCurrentCam()) {
+            case 0:
+                rot_leftright -= cameraSpeed;
+                Center = camera.rotateCamera(cameraSpeed, rot_leftright);
+                theta_ship += cameraSpeed;
+                break;
+            case 1:
+                theta_ship -= cameraSpeed;
+                break;
+            }
+
         }
-        
+
+        if (key == GLFW_KEY_D &&
+            action == GLFW_REPEAT) {
+
+            switch (camera.getCurrentCam()) {
+            case 0:
+                rot_leftright += cameraSpeed;
+                Center = camera.rotateCamera(cameraSpeed, rot_leftright);
+                theta_ship -= cameraSpeed;
+                break;
+            case 1:
+                theta_ship += cameraSpeed;
+                break;
+            }
+        }
+
+        // forward
+        if (key == GLFW_KEY_W &&
+            action == GLFW_REPEAT) {
+            camera.updateCameraPos(cameraSpeed, 'f');
+            mov_forback -= cameraSpeed;
+        }
+
+        // backward
+        if (key == GLFW_KEY_S &&
+            action == GLFW_REPEAT) {
+            camera.updateCameraPos(cameraSpeed, 'b');
+            mov_forback += cameraSpeed;
+        }
+
+        if (key == GLFW_KEY_Q &&
+            action == GLFW_REPEAT) {
+            camera.updateCameraPos(cameraSpeed, 'q');
+            mov_updown += cameraSpeed;
+        }
+
+        if (key == GLFW_KEY_E &&
+            action == GLFW_REPEAT) {
+            camera.updateCameraPos(cameraSpeed, 'e');
+            mov_updown -= cameraSpeed;
+        }
+
+        if (key == GLFW_KEY_1 &&
+            action == GLFW_PRESS) {
+            // Change to third person moveable
+            camera.changeCam();
+        }
     }
-
-    if (key == GLFW_KEY_D &&
-        action == GLFW_REPEAT) {
-
-        switch (camera.getCurrentCam()) {
-        case 0:
-            rot_leftright += cameraSpeed;
-            Center = camera.rotateCamera(cameraSpeed, rot_leftright);
-            theta_ship -= cameraSpeed;
-            break;
-        case 1:
-            theta_ship += cameraSpeed;
-            break;
+    else {
+        if (key == GLFW_KEY_W &&
+            action == GLFW_REPEAT) {
+            camera.movOrtho('w', cameraSpeed);
         }
+
+        if (key == GLFW_KEY_S &&
+            action == GLFW_REPEAT) {
+            camera.movOrtho('s', cameraSpeed);
+        }
+
+        if (key == GLFW_KEY_A &&
+            action == GLFW_REPEAT) {
+            camera.movOrtho('a', cameraSpeed);
+        }
+
+        if (key == GLFW_KEY_D &&
+            action == GLFW_REPEAT) {
+            camera.movOrtho('d', cameraSpeed);
+        }
+
+
     }
     
-    if (key == GLFW_KEY_1 &&
+
+    if (key == GLFW_KEY_2 &&
         action == GLFW_PRESS) {
-        // Change to third person moveable
-        camera.changePersp();
+        // Change to ortho
+        camera.changePerspective();
     }
 
-    // forward
-    if (key == GLFW_KEY_W &&
-        action == GLFW_REPEAT) {
-        camera.updateCameraPos(cameraSpeed, 'f');
-        mov_forback -= cameraSpeed;
-    }
-
-    // backward
-    if (key == GLFW_KEY_S &&
-        action == GLFW_REPEAT) {
-        camera.updateCameraPos(cameraSpeed, 'b');
-        mov_forback += cameraSpeed;
-    }
-
-    if (key == GLFW_KEY_Q &&
-        action == GLFW_REPEAT) {
-        camera.updateCameraPos(cameraSpeed, 'q');
-        mov_updown += cameraSpeed;
-    }
-
-    if (key == GLFW_KEY_E &&
-        action == GLFW_REPEAT) {
-        camera.updateCameraPos(cameraSpeed, 'e');
-        mov_updown -= cameraSpeed;
-    }
     if (key == GLFW_KEY_F && action == GLFW_PRESS) {
         light_setting++;
         light_setting = light_setting % 3;
     }
+}
+
+void EmptyCallBack(GLFWwindow* window,
+    int key,
+    int scancode,
+    int action,
+    int mods) {
+    // just to switch between disabled and not
 }
 
 int main(void)
@@ -227,14 +268,14 @@ int main(void)
     */
     //Vertices for the cube
     float skyboxVertices[]{
-        -1.f, -1.f, 1.f, //0
-        1.f, -1.f, 1.f,  //1
-        1.f, -1.f, -1.f, //2
-        -1.f, -1.f, -1.f,//3
-        -1.f, 1.f, 1.f,  //4
-        1.f, 1.f, 1.f,   //5
-        1.f, 1.f, -1.f,  //6
-        -1.f, 1.f, -1.f  //7
+            -800.f, -800.f, 800.f, //0
+            800.f, -800.f, 800.f,  //1
+            800.f, -800.f, -800.f, //2
+            -800.f, -800.f, -800.f,//3
+            -800.f, 800.f, 800.f,  //4
+            800.f, 800.f, 800.f,   //5
+            800.f, 800.f, -800.f,  //6
+            -800.f, 800.f, -800.f  //7
     };
 
     //Skybox Indices
@@ -420,7 +461,7 @@ int main(void)
         case 0:
             glfwSetCursorPosCallback(window, GL_FALSE);
             glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-            currShader = sonar_shaderProg;
+            currShader = shaderProg;
             break;
         case 1:
             glfwSetCursorPosCallback(window, mouse_callback);

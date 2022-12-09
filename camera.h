@@ -13,8 +13,8 @@
 
 class Camera {
 public:
-	glm::mat4 projection;
-	int currCam;
+	glm::mat4 projection, savedProj;
+	int currCam, currPersp;
 	float width, height, x_cam, y_cam, z_cam;
 
 	// Other things
@@ -22,9 +22,10 @@ public:
 	glm::mat4 cameraPositionMatrix, cameraOrientation;
 	glm::vec3 F, R, U;
 	glm::mat4 viewMatrix;
-	glm::vec3 cameraPos2;
+	glm::vec3 cameraPos2, cameraPos3;
 
 	glm::vec3 currCenter;
+	glm::vec3 orthovec;
 
 	// Starting Projection (Perspective)
 	Camera(float window_width, float window_height, float x, float y, float z) {
@@ -36,6 +37,8 @@ public:
 			100.0f
 		);
 
+		savedProj = projection;
+
 		width = window_width;
 		height = window_height;
 
@@ -45,16 +48,20 @@ public:
 
 		cameraPos = glm::vec3(x_cam, y_cam, z_cam);
 		cameraPos2 = glm::vec3(0, 4.f, 20.f);
+		cameraPos3 = glm::vec3(x_cam, 90.0f, z_cam);
+		orthovec = glm::vec3(0.f, 5.f, 0.f);
 
 		// 0 for first person 1 for third person
 		currCam = 0;
+		// 0 for persp 1 for ortho
+		currPersp = 0;
 	}
 
 	int getCurrentCam() {
 		return currCam;
 	}
 
-	void changePersp() {
+	void changeCam() {
 		if (currCam) {
 			projection = glm::perspective(
 				glm::radians(60.0f),
@@ -72,19 +79,39 @@ public:
 				0.1f,
 				100.0f
 			);
-			// TODO: Fix This
-			/*
-			projection = glm::ortho(-0.5f,
-				0.5f,
-				-0.5f,
-				0.5f,
-				-100.f,
-				100.f
-			); */
 
 			currCam = 1;
 		}
+
+		savedProj = projection;
 	}
+
+	void changePerspective() {
+
+		// if ortho change to persp
+		if (currPersp) {
+
+			projection = savedProj;
+			currPersp = 0;
+		}
+		// change to ortho
+		else {
+			float aspect = float(width / height);
+			// ortho(-(800.0f / 2.0f), 800.0f / 2.0f, 600.0f / 2.0f, -(600.0f / 2.0f), -1000.0f, 1000.0f);
+			// glm::ortho(-aspect, aspect, -1.0f, 1.0f, zNear, zFar);
+			projection = glm::ortho(-(width / 20),
+				width / 20,
+				-(height / 20),
+				height / 20,
+				-1000.f,
+				1000.f
+			);
+
+			currPersp = 1;
+		}
+	}
+
+
 
 	glm::mat4 getProjection() {
 		return projection;
@@ -97,14 +124,19 @@ public:
 
 		WorldUp = glm::vec3(0, 1.0f, 0);
 
-		switch (currCam) {
-		case 0:
-			currCenter = cent;
+		if (currPersp == 0) {
+			switch (currCam) {
+			case 0:
+				currCenter = cent;
 				//glm::vec3(0, 0.0f, -1.0f);
-			break;
-		case 1:
-			currCenter = cent;
-			break;
+				break;
+			case 1:
+				currCenter = cent;
+				break;
+			}
+		}
+		else {
+			currCenter = orthovec;
 		}
 
 		// forward
@@ -132,14 +164,22 @@ public:
 		cameraOrientation[1][2] = -F.y;
 		cameraOrientation[2][2] = -F.z;
 
-		switch (currCam) {
-		case 0:
-			viewMatrix = glm::lookAt(cameraPos, cameraPos + currCenter, WorldUp);
-			break;
-		case 1:
-			viewMatrix = glm::lookAt(cameraPos2, cameraPos2 + currCenter, WorldUp);
-			break;
+		if (currPersp == 0) {
+			switch (currCam) {
+
+			case 0:
+				viewMatrix = glm::lookAt(cameraPos, cameraPos + currCenter, WorldUp);
+				break;
+			case 1:
+				viewMatrix = glm::lookAt(cameraPos2, cameraPos2 + currCenter, WorldUp);
+				break;
+
+			}
 		}
+		else {
+			viewMatrix = glm::lookAt(cameraPos3, cameraPos3 + currCenter, glm::vec3(0, 0, -1.0f));
+		}
+
 	}
 
 	glm::vec3 getCameraPos() {
@@ -206,6 +246,27 @@ public:
 		front.y = sin(glm::radians(pitch));
 		front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
 		return glm::normalize(front);
+	}
+
+	int getCurrPersp() {
+		return currPersp;
+	}
+
+	void movOrtho(char c, float cameraSpeed) {
+		switch (c) {
+		case 'w':
+			cameraPos3 += cameraSpeed * currCenter;
+			break;
+		case 's':
+			cameraPos3 -= cameraSpeed * currCenter;
+			break;
+		case 'a':
+			cameraPos3 += cameraSpeed;
+			break;
+		case 'd':
+			cameraPos3 += cameraSpeed;
+			break;
+		}
 	}
 
 };
